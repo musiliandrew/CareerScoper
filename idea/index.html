@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerScope — Career Operating System</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-page: #F8F9FA;
+      --bg-card: #FFFFFF;
+      --bg-terminal-header: #FAFAFB;
+      --text-main: #111827;
+      --text-muted: #6B7280;
+      --text-subtle: #9CA3AF;
+      --border-color: #E5E7EB;
+      --accent-green: #10B981;
+      --accent-green-bg: #ECFDF5;
+      --accent-green-border: #A7F3D0;
+      --btn-black: #0F172A;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation */
+    header {
+      width: 100%;
+      height: 72px;
+      border-b: 1px solid var(--border-color);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      background: var(--bg-page);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .btn-nav-request {
+      background-color: var(--btn-black);
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn-nav-request:hover {
+      opacity: 0.9;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 48px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* Left Hero Column */
+    .hero-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 560px;
+      padding-right: 12px;
+    }
+
+    .hero-top {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-green);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .hero-title {
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      background-color: var(--btn-black);
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      transition: opacity 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-page);
+    }
+
+    .hero-footer-signal {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-subtle);
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .hero-footer-signal strong {
+      color: var(--text-main);
+    }
+
+    /* Right Terminal Window */
+    .terminal-window {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-header {
+      background: var(--bg-terminal-header);
+      border-b: 1px solid var(--border-color);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+
+    /* Left Stats Column inside Terminal */
+    .stats-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .career-score-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .score-max {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-subtle);
+    }
+
+    .score-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-green);
+      background: var(--accent-green-bg);
+      border: 1px solid var(--accent-green-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .card-subtext {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Progress Bar */
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #F1F5F9;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      width: 66%;
+      height: 100%;
+      background: var(--accent-green);
+      border-radius: 99px;
+    }
+
+    .progress-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    /* Skill Gaps Tags */
+    .skills-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Right Main Panel inside Terminal */
+    .main-terminal-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .top-metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .metric-note {
+      font-size: 11px;
+      color: var(--text-subtle);
+      margin-top: 4px;
+    }
+
+    /* Opportunity Table */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table-header-bar {
+      padding: 12px 16px;
+      border-b: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      text-align: left;
+      padding: 10px 16px;
+      border-b: 1px solid var(--border-color);
+      background: var(--bg-terminal-header);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-b: 1px solid #F3F4F6;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    tr:last-child td {
+      border-b: none;
+    }
+
+    tr:hover td {
+      background-color: var(--bg-page);
+    }
+
+    .td-time {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-subtle);
+    }
+
+    .td-company {
+      font-weight: 700;
+
+    }
+
+    .td-role {
+      color: var(--text-main);
+    }
+
+    .td-match {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: right;
+    }
+
+    .td-salary {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-main);
+      text-align: right;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .terminal-body {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand">
+      <span class="brand-logo">CareerScope</span>
+      <span class="brand-badge">CAREER OS</span>
+    </div>
+    <nav>
+      <a href="#product">Product</a>
+      <a href="#method">Method</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#login">Log in</a>
+      <a href="#request" class="btn-nav-request">REQUEST ACCESS</a>
+    </nav>
+  </header>
+
+  <!-- Main Grid Content -->
+  <main>
+    <!-- Left Hero Column -->
+    <div class="hero-col">
+      <div class="hero-top">
+        <div class="status-pill">
+          <span class="dot"></span>
+          <span>CAREER OPERATING SYSTEM — V4.2</span>
+        </div>
+
+        <h1 class="hero-title">Run your career like an operator.</h1>
+
+        <p class="hero-desc">
+          CareerScope monitors the global labour market continuously, scores your position against it, and returns a sequenced plan for the next twelve months. Evidence, not encouragement.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-primary">REQUEST ACCESS</button>
+          <button class="btn-secondary">SEE THE TERMINAL &rarr;</button>
+        </div>
+      </div>
+
+      <div class="hero-footer-signal">
+        <span class="dot"></span>
+        <span>Live signal <strong id="signal-time">09:42</strong> — Career Score <strong>782 / 900</strong></span>
+      </div>
+    </div>
+
+    <!-- Right Terminal Window -->
+    <div class="terminal-window">
+      <!-- Terminal Bar -->
+      <div class="terminal-header">
+        <span>CAREERSCOPE TERMINAL — SESSION /CAREER/SCOPE</span>
+        <span class="status-pill">
+          <span class="dot"></span>
+          <span>LIVE</span>
+        </span>
+      </div>
+
+      <!-- Terminal Body Grid -->
+      <div class="terminal-body">
+        
+        <!-- Left Stats Sidebar inside Terminal -->
+        <div class="stats-col">
+          <!-- Career Score Card -->
+          <div class="card">
+            <div class="card-label">CAREER SCORE</div>
+            <div class="career-score-value">
+              <span>782</span>
+              <span class="score-max">/ 900</span>
+              <span class="score-badge">+34</span>
+            </div>
+            <div class="card-subtext">TOP 8% — SENIOR BACKEND, EU</div>
+          </div>
+
+          <!-- Weekly Progress Card -->
+          <div class="card">
+            <div class="card-label">WEEKLY PROGRESS</div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-status">4 / 6 milestones cleared</div>
+          </div>
+
+          <!-- Skill Gaps Card -->
+          <div class="card">
+            <div class="card-label">SKILL GAPS</div>
+            <div class="skills-flex">
+              <span class="skill-tag">System Design</span>
+              <span class="skill-tag">Kubernetes</span>
+              <span class="skill-tag">Staff Comms</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Main Opportunities Panel inside Terminal -->
+        <div class="main-terminal-panel">
+          <!-- Metrics Row -->
+          <div class="top-metric-row">
+            <div class="metric-card">
+              <div class="card-label">MATCH SCORE</div>
+              <div class="metric-value">92%</div>
+              <div class="metric-note">vs. target roles</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-label">SALARY PROJECTION</div>
+              <div class="metric-value">$232k</div>
+              <div class="metric-note">from $198k baseline</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="card-label">RECRUITER ACTIVITY</div>
+              <div class="metric-value" style="display: flex; items-center; justify-content: space-between;">
+                <span>7</span>
+                <span class="score-badge" style="font-size: 11px; margin: 0;">+3</span>
+              </div>
+              <div class="metric-note">Inbound this week</div>
+            </div>
+          </div>
+
+          <!-- Streaming Opportunity Feed Table -->
+          <div class="table-container">
+            <div class="table-header-bar">
+              <span>OPPORTUNITY FEED</span>
+              <span style="color: var(--accent-green);">STREAMING</span>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 70px;">TIME</th>
+                  <th style="width: 100px;">COMPANY</th>
+                  <th>ROLE</th>
+                  <th style="text-align: right; width: 70px;">MATCH</th>
+                  <th style="text-align: right; width: 80px;">SALARY</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-time">09:42</td>
+                  <td class="td-company">Ramp</td>
+                  <td class="td-role">Staff Backend Engineer</td>
+                  <td class="td-match">94%</td>
+                  <td class="td-salary">$232k</td>
+                </tr>
+                <tr>
+                  <td class="td-time">09:15</td>
+                  <td class="td-company">Vercel</td>
+                  <td class="td-role">Senior Platform Engineer</td>
+                  <td class="td-match">91%</td>
+                  <td class="td-salary">$221k</td>
+                </tr>
+                <tr>
+                  <td class="td-time">08:58</td>
+                  <td class="td-company">Stripe</td>
+                  <td class="td-role">Staff Software Engineer</td>
+                  <td class="td-match">89%</td>
+                  <td class="td-salary">$245k</td>
+                </tr>
+                <tr>
+                  <td class="td-time">08:30</td>
+                  <td class="td-company">Datadog</td>
+                  <td class="td-role">Senior Backend Engineer</td>
+                  <td class="td-match">87%</td>
+                  <td class="td-salary">$198k</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Live signal timestamp clock
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hours}:${mins}`;
+      const elem = document.getElementById('signal-time');
+      if (elem) elem.textContent = timeStr;
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+  </script>
+</body>
+</html>
