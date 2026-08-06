@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -11,406 +11,714 @@ import {
   ArrowRight,
   CheckCircle2,
   Cpu,
-  Globe2,
+  Globe,
+  TrendingUp,
   ShieldCheck,
   ChevronRight,
   Play,
   BarChart3,
   Layers,
-  Bot
+  Bot,
+  Search,
+  Clock,
+  Terminal,
+  Activity,
+  ArrowUpRight,
+  Building2,
+  Check,
+  Radio,
+  Brain,
+  FileCode2,
+  Workflow,
+  Sparkle
 } from "lucide-react";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<"radar" | "match" | "plan" | "outreach">("radar");
+  const [activeConsoleTab, setActiveConsoleTab] = useState<"stream" | "ingestion" | "reasoning" | "outreach">("stream");
+  const [listingCount, setListingCount] = useState<number>(14208);
+
+  // Simulate real-time job listings count
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setListingCount((prev) => prev + Math.floor(Math.random() * 3));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/*  Glassmorphism Top Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/60 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 p-[1px] shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-              <div className="w-full h-full bg-black rounded-[11px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
-              </div>
-            </div>
-            <span className="text-xl font-semibold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              CareerScoper
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans selection:bg-[#0891B2]/20 selection:text-[#0891B2]">
+      
+      {/* 1. Top Navigation Header */}
+      <header className="w-full h-18 border-b border-[#E2E8F0] bg-white sticky top-0 z-50">
+        <div className="max-w-[1280px] mx-auto h-full px-6 sm:px-8 flex items-center justify-between">
+          {/* Logo & Brand */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <svg className="w-8 h-8 transition-transform group-hover:scale-105" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2" fill="none" />
+              <line x1="16" y1="6" x2="16" y2="26" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
+              <line x1="6" y1="16" x2="26" y2="16" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
+              <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
+              <circle cx="22" cy="10" r="1.5" fill="#F59E0B" opacity="0.8" />
+              <circle cx="10" cy="22" r="1.5" fill="#F59E0B" opacity="0.8" />
+            </svg>
+            <span className="brand-title text-xl">
+              Career<span className="cyan-text">Scope</span>
             </span>
-            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[10px] font-mono font-medium tracking-wider uppercase rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">
-              v2.5 AI Agentic
-            </span>
-          </div>
+          </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-            <a href="#radar" className="hover:text-white transition-colors">Radar</a>
-            <a href="#reasoning" className="hover:text-white transition-colors">AI Match Engine</a>
-            <a href="#architecture" className="hover:text-white transition-colors">Architecture</a>
-            <a href="#telemetry" className="hover:text-white transition-colors">Metrics</a>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#475569]">
+            <a href="#how-it-works" className="hover:text-[#0891B2] transition-colors">How it works</a>
+            <a href="#market" className="hover:text-[#0891B2] transition-colors">Market Data</a>
+            <a href="#roadmap" className="hover:text-[#0891B2] transition-colors">Growth Roadmap</a>
+            <a href="#pricing" className="hover:text-[#0891B2] transition-colors">Pricing</a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          {/* Action CTAs */}
+          <div className="flex items-center gap-3">
             <Link
-              href="https://careerscope-backend-786345663105.us-central1.run.app/admin/"
-              className="text-sm text-zinc-400 hover:text-white transition-colors px-3 py-2"
+              href="/login"
+              className="text-sm font-semibold text-[#0F172A] hover:text-[#0891B2] px-3 py-2 transition-colors"
             >
               Sign In
             </Link>
-            <Link
-              href="#console"
-              className="relative inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-full bg-white text-black hover:bg-zinc-200 transition-all shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:shadow-[0_0_35px_rgba(255,255,255,0.4)]"
-            >
-              <span>Launch Co-Pilot</span>
-              <ArrowRight className="w-4 h-4" />
+            <Link href="/signup" className="btn-cyan-nav shadow-sm">
+              <span>Get Started Free</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/*  Hero Section */}
-      <section className="relative pt-40 pb-24 overflow-hidden">
-        {/* Ambient Radial Lighting Glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-cyan-600/20 via-indigo-600/20 to-purple-600/10 blur-[140px] rounded-full pointer-events-none -z-10" />
-        <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-cyan-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* 2. Hero Main Section */}
+      <section className="max-w-[1280px] mx-auto px-6 sm:px-8 py-10 lg:py-16 grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-10 lg:gap-12 items-start">
+        
+        {/* Left Hero Copy Column */}
+        <div className="flex flex-col justify-between min-h-[480px]">
+          <div className="space-y-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-[44px] font-extrabold tracking-tight text-[#0F172A] leading-[1.08]">
+              Run your career with{" "}
+              <span className="cyan-text">precision & data.</span>
+            </h1>
 
-        <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
-          {/* Pulsing AI Engine Pill */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-cyan-300 backdrop-blur-md text-xs font-mono shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-            <Cpu className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '8s' }} />
-            <span>POWERED BY GEMINI 2.5 FLASH & DISTRIBUTED CLOUD RUN</span>
+            <p className="text-base text-[#475569] leading-relaxed font-normal">
+              CareerScope automatically tracks job market data, calculates your exact readiness for target roles, and gives you a 30-day plan to learn missing skills. Plain evidence, clear results.
+            </p>
+
+            <div className="flex flex-col gap-3 pt-2">
+              <Link href="/signup" className="btn-primary-dark shadow-md">
+                <span>Run Free Career Analysis</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a href="#simulation" className="btn-secondary-outline">
+                <span>Explore Live Simulation</span>
+              </a>
+            </div>
           </div>
 
-          {/* Cinematic Headline */}
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight max-w-5xl mx-auto leading-[1.08]">
-            Your Autonomous AI Co-Pilot for{" "}
-            <span className="bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              Infinite Career Growth
-            </span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-3xl mx-auto font-normal leading-relaxed">
-            CareerScoper scans global tech job markets 24/7, computes your exact match readiness, fills your skill gaps with 30-day action plans, and executes recruiter outreach automatically.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link
-              href="#console"
-              className="w-full sm:w-auto px-8 py-4 text-base font-semibold rounded-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-white shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_45px_rgba(99,102,241,0.6)] transition-all hover:scale-[1.02]"
-            >
-              Start Free Co-Pilot Today
-            </Link>
-            <a
-              href="#telemetry"
-              className="w-full sm:w-auto px-8 py-4 text-base font-medium rounded-full border border-white/15 bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all backdrop-blur-lg flex items-center justify-center gap-2"
-            >
-              <Play className="w-4 h-4 text-cyan-400 fill-cyan-400" />
-              <span>Explore Live Telemetry</span>
-            </a>
-          </div>
-
-          {/* Micro Trust Indicators */}
-          <div className="pt-8 flex flex-wrap justify-center items-center gap-8 text-xs font-mono text-zinc-400">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-              <span>10+ Global Data Sources</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-              <span>Neon Serverless Postgres</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-              <span>Zero Human Configuration</span>
-            </div>
+          {/* Live Signal Footer Indicator */}
+          <div className="flex items-center gap-2.5 font-mono-code text-xs text-[#94A3B8] border-t border-[#E2E8F0] pt-6 mt-8">
+            <div className="w-2 h-2 rounded-full bg-[#10B981] animate-ping" />
+            <span>STATUS: <strong className="text-[#0F172A]">{listingCount.toLocaleString()} Listings Monitored</strong></span>
           </div>
         </div>
-      </section>
 
-      {/*  Live Telemetry & Console Demonstration */}
-      <section id="console" className="py-20 relative">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center space-y-4 mb-12">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-cyan-400">Live Agent Console</h2>
-            <p className="text-3xl sm:text-5xl font-bold tracking-tight">Experience Real-Time Career Intelligence</p>
+        {/* Right Terminal Window */}
+        <div className="terminal-window" id="simulation">
+          
+          {/* Terminal Header */}
+          <div className="terminal-header flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-3.5 h-3.5 text-[#0891B2]" />
+              <span className="font-mono-code">careerscope // live-telemetry</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="live-feed-badge flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                LIVE FEED
+              </span>
+            </div>
           </div>
 
-          {/* Interactive Console Wrapper */}
-          <div className="rounded-3xl border border-white/10 bg-zinc-950/80 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.8)] overflow-hidden">
-            {/* Console Bar Header */}
-            <div className="px-6 py-4 border-b border-white/10 bg-white/[0.02] flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="ml-3 text-xs font-mono text-zinc-500">careerscope-agent-daemon // live telemetry</span>
-              </div>
-
-              {/* Console Tabs */}
-              <div className="flex items-center gap-1 bg-black/60 p-1 rounded-xl border border-white/10 text-xs font-medium">
-                <button
-                  onClick={() => setActiveTab("radar")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activeTab === "radar" ? "bg-cyan-950 text-cyan-300 border border-cyan-500/30" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  📡 Job Radar
-                </button>
-                <button
-                  onClick={() => setActiveTab("match")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activeTab === "match" ? "bg-indigo-950 text-indigo-300 border border-indigo-500/30" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  🧠 Match Reasoning
-                </button>
-                <button
-                  onClick={() => setActiveTab("plan")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activeTab === "plan" ? "bg-purple-950 text-purple-300 border border-purple-500/30" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  📈 30-Day Growth
-                </button>
-                <button
-                  onClick={() => setActiveTab("outreach")}
-                  className={`px-3 py-1.5 rounded-lg transition-all ${
-                    activeTab === "outreach" ? "bg-emerald-950 text-emerald-300 border border-emerald-500/30" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  ✉️ Auto-Apply
-                </button>
-              </div>
+          {/* Console Tab Bar (Using Real Vector Icons Only - No Emojis) */}
+          <div className="bg-[#F8FAFC] border-b border-[#E2E8F0] px-4 py-2 flex items-center justify-between gap-2 overflow-x-auto">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveConsoleTab("stream")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono-code font-semibold transition-all flex items-center gap-1.5 ${
+                  activeConsoleTab === "stream"
+                    ? "bg-[#0F172A] text-white"
+                    : "text-[#475569] hover:bg-[#E2E8F0]"
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-[#0891B2]" />
+                <span>Score & Stream</span>
+              </button>
+              <button
+                onClick={() => setActiveConsoleTab("ingestion")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono-code font-semibold transition-all flex items-center gap-1.5 ${
+                  activeConsoleTab === "ingestion"
+                    ? "bg-[#0891B2] text-white"
+                    : "text-[#475569] hover:bg-[#E2E8F0]"
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5" />
+                <span>Ingestion Scraper</span>
+              </button>
+              <button
+                onClick={() => setActiveConsoleTab("reasoning")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono-code font-semibold transition-all flex items-center gap-1.5 ${
+                  activeConsoleTab === "reasoning"
+                    ? "bg-[#0891B2] text-white"
+                    : "text-[#475569] hover:bg-[#E2E8F0]"
+                }`}
+              >
+                <Brain className="w-3.5 h-3.5" />
+                <span>AI Match Reasoning</span>
+              </button>
+              <button
+                onClick={() => setActiveConsoleTab("outreach")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono-code font-semibold transition-all flex items-center gap-1.5 ${
+                  activeConsoleTab === "outreach"
+                    ? "bg-[#0891B2] text-white"
+                    : "text-[#475569] hover:bg-[#E2E8F0]"
+                }`}
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Auto-Apply Agent</span>
+              </button>
             </div>
+          </div>
 
-            {/* Console Content Window */}
-            <div className="p-8 min-h-[380px]">
-              {activeTab === "radar" && (
-                <div className="space-y-4 font-mono text-sm">
-                  <div className="flex items-center justify-between text-xs text-zinc-500 border-b border-white/5 pb-2">
-                    <span>STATUS: ACTIVE SCHEDULER</span>
-                    <span>INGESTED: 74 UNIQUE POSTINGS TODAY</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between">
-                      <div>
-                        <div className="text-white font-semibold font-sans">Principal AI Agent / ML Software Engineer</div>
-                        <div className="text-xs text-zinc-400">Ll Oefentherapie • Remote (US) • Posted 2h ago</div>
-                      </div>
-                      <span className="px-3 py-1 text-xs rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-sans">94% Match</span>
-                    </div>
-                    <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between">
-                      <div>
-                        <div className="text-white font-semibold font-sans">Junior AI/ML Software Engineer</div>
-                        <div className="text-xs text-zinc-400">Guidehouse • Hybrid • Ingested Today</div>
-                      </div>
-                      <span className="px-3 py-1 text-xs rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-sans">88% Match</span>
-                    </div>
-                    <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between">
-                      <div>
-                        <div className="text-white font-semibold font-sans">Senior AI Engineer</div>
-                        <div className="text-xs text-zinc-400">Cadence Design Systems • Full Time • Ingested Today</div>
-                      </div>
-                      <span className="px-3 py-1 text-xs rounded-full bg-purple-950 text-purple-300 border border-purple-500/30 font-sans">91% Match</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "match" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">Match Evaluation: Senior Backend Engineer @ CareerScoper</h3>
-                      <p className="text-xs text-zinc-400">Pydantic-AI Engine + Gemini 2.5 Flash Telemetry</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-bold text-cyan-400">76.2%</div>
-                      <div className="text-[10px] text-zinc-500 uppercase font-mono">Overall Readiness</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/20 space-y-2">
-                      <div className="font-semibold text-emerald-400 flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Verified Matching Capabilities
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="px-2 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">Python 3.11</span>
-                        <span className="px-2 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">FastAPI</span>
-                        <span className="px-2 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">PostgreSQL</span>
-                        <span className="px-2 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">GCP Cloud Run</span>
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-950/20 space-y-2">
-                      <div className="font-semibold text-amber-400 flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        Targeted Skill Bridge
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        <span className="px-2 py-1 rounded bg-amber-950 text-amber-300 border border-amber-500/30">Docker Multi-stage</span>
-                        <span className="px-2 py-1 rounded bg-amber-950 text-amber-300 border border-amber-500/30">Kubernetes Helm</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "plan" && (
+          {/* Terminal Body */}
+          <div className="p-6">
+            {activeConsoleTab === "stream" && (
+              <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6">
+                
+                {/* Left Stats Column inside Terminal */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between text-xs text-purple-300 font-mono">
-                    <span>30-DAY PERSONALIZED ACTION ROADMAP</span>
-                    <span>TARGET: UN-REJECTABLE READINESS</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="p-3.5 rounded-xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-bold font-mono">1</div>
-                      <div>
-                        <div className="text-sm font-semibold">Week 1: Advanced Docker Orchestration</div>
-                        <div className="text-xs text-zinc-400">Build non-root multi-stage containers for distributed FastAPI engines.</div>
-                      </div>
+                  {/* Career Score Card */}
+                  <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 space-y-2">
+                    <div className="flex items-center justify-between font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider">
+                      <span>Career Score</span>
+                      <span className="score-badge">+34 pts</span>
                     </div>
-                    <div className="p-3.5 rounded-xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-purple-950 border border-purple-500/40 text-purple-300 flex items-center justify-center text-xs font-bold font-mono">2</div>
-                      <div>
-                        <div className="text-sm font-semibold">Week 2: Cloud Tasks & Event Queuing</div>
-                        <div className="text-xs text-zinc-400">Implement dynamic Cloud Tasks queues for asynchronous memory triggers.</div>
-                      </div>
+                    <div className="text-4xl font-bold tracking-tight text-[#0F172A] flex items-baseline gap-1.5">
+                      782 <span className="text-base font-medium text-[#94A3B8]">/ 900</span>
                     </div>
+                    <div className="w-full h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                      <div className="w-[78%] h-full bg-[#0891B2] rounded-full" />
+                    </div>
+                    <div className="font-mono-code text-xs text-[#475569]">Readiness: High (Top 8%)</div>
                   </div>
-                </div>
-              )}
 
-              {activeTab === "outreach" && (
-                <div className="space-y-4 font-mono text-xs text-zinc-300">
-                  <div className="flex items-center justify-between text-emerald-400 border-b border-white/10 pb-2">
-                    <span>LANGGRAPH AUTO-APPLY AGENT OUTPUT</span>
-                    <span>RECRUITER: CAREERS@OPENAI.COM</span>
-                  </div>
-                  <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] space-y-2">
-                    <p className="text-zinc-400"><strong className="text-white">Subject:</strong> Application for Staff AI Engineer — Andrew Musili</p>
-                    <p>Dear Hiring Team,</p>
-                    <p className="leading-relaxed">I have been following OpenAI’s work on distributed agent reasoning systems. My background in building multi-service Cloud Run architectures with Gemini 2.5 and Neon Postgres aligns directly with your current infrastructure scaling goals...</p>
+                  {/* Priority Skill Gaps */}
+                  <div className="bg-white border border-[#E2E8F0] rounded-lg p-4 space-y-2">
+                    <div className="font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider">
+                      Priority Skill Gaps
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <span className="skill-tag">Kubernetes</span>
+                      <span className="skill-tag">System Architecture</span>
+                      <span className="skill-tag">LLM Evaluation</span>
+                    </div>
                   </div>
                 </div>
-              )}
+
+                {/* Right Main Panel inside Terminal */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-white border border-[#E2E8F0] rounded-lg p-3.5">
+                      <div className="font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase">Target Role Fit</div>
+                      <div className="text-2xl font-bold text-[#0891B2] mt-1">88%</div>
+                      <div className="text-[11px] text-[#94A3B8] mt-0.5">vs Staff Engineer</div>
+                    </div>
+                    <div className="bg-white border border-[#E2E8F0] rounded-lg p-3.5">
+                      <div className="font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase">Salary Band</div>
+                      <div className="text-2xl font-bold text-[#0F172A] mt-1">$185k</div>
+                      <div className="text-[11px] text-[#94A3B8] mt-0.5">+18% vs current</div>
+                    </div>
+                    <div className="bg-white border border-[#E2E8F0] rounded-lg p-3.5">
+                      <div className="font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase">Inbound Recruiter</div>
+                      <div className="text-2xl font-bold text-[#0F172A] mt-1">8</div>
+                      <div className="text-[11px] text-[#94A3B8] mt-0.5">this week</div>
+                    </div>
+                  </div>
+
+                  {/* Market Stream Table */}
+                  <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[#E2E8F0] flex items-center justify-between font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider">
+                      <span>Live Market Match Stream</span>
+                      <span>Updated Just Now</span>
+                    </div>
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] font-mono-code text-[10px] font-semibold text-[#94A3B8] uppercase">
+                        <tr>
+                          <th className="px-4 py-2.5">Target Company</th>
+                          <th className="px-4 py-2.5">Role</th>
+                          <th className="px-4 py-2.5 text-right">Match Score</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E2E8F0]">
+                        <tr className="hover:bg-[#F8FAFC]">
+                          <td className="px-4 py-3 font-semibold text-[#0F172A]">Ramp</td>
+                          <td className="px-4 py-3 text-[#475569]">Staff Backend Engineer</td>
+                          <td className="px-4 py-3 text-right"><span className="match-pill">94%</span></td>
+                        </tr>
+                        <tr className="hover:bg-[#F8FAFC]">
+                          <td className="px-4 py-3 font-semibold text-[#0F172A]">Vercel</td>
+                          <td className="px-4 py-3 text-[#475569]">Senior Platform Engineer</td>
+                          <td className="px-4 py-3 text-right"><span className="match-pill">91%</span></td>
+                        </tr>
+                        <tr className="hover:bg-[#F8FAFC]">
+                          <td className="px-4 py-3 font-semibold text-[#0F172A]">Stripe</td>
+                          <td className="px-4 py-3 text-[#475569]">Staff Software Engineer</td>
+                          <td className="px-4 py-3 text-right"><span className="match-pill">89%</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {activeConsoleTab === "ingestion" && (
+              <div className="space-y-4 font-mono-code text-xs">
+                <div className="flex items-center justify-between text-[#94A3B8] border-b border-[#E2E8F0] pb-2">
+                  <span className="flex items-center gap-1.5">
+                    <Radio className="w-3.5 h-3.5 text-[#0891B2]" />
+                    SERVICE: CAREERSCOPE-INGESTION (FASTAPI)
+                  </span>
+                  <span className="text-[#10B981] font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                    11 ACTIVE SCRAPERS
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-[#0F172A]">Reddit & Remote Job Ingestion Scraper</div>
+                      <div className="text-[11px] text-[#475569]">Extracted 4 Web3 & Senior Backend Listings (Gemini 2.5 Engine)</div>
+                    </div>
+                    <span className="px-2 py-1 rounded bg-[#ECFDF5] text-[#10B981] text-[10px] font-semibold flex items-center gap-1">
+                      <Check className="w-3 h-3" /> SUCCESS
+                    </span>
+                  </div>
+                  <div className="p-3 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-[#0F172A]">Simplify & PittCSC Internship GitHub Feeds</div>
+                      <div className="text-[11px] text-[#475569]">Ingested 10 verified tech internship posts</div>
+                    </div>
+                    <span className="px-2 py-1 rounded bg-[#ECFDF5] text-[#10B981] text-[10px] font-semibold flex items-center gap-1">
+                      <Check className="w-3 h-3" /> SUCCESS
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeConsoleTab === "reasoning" && (
+              <div className="space-y-4 font-mono-code text-xs">
+                <div className="flex items-center justify-between text-[#94A3B8] border-b border-[#E2E8F0] pb-2">
+                  <span className="flex items-center gap-1.5">
+                    <Brain className="w-3.5 h-3.5 text-[#0891B2]" />
+                    SERVICE: CAREERSCOPE-DECISION-ENGINE
+                  </span>
+                  <span className="text-[#0891B2] font-semibold">GEMINI 2.5 REASONING</span>
+                </div>
+                <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg space-y-2">
+                  <div className="font-bold text-[#0F172A]">AI Match Breakdown:</div>
+                  <p className="text-[#475569] leading-relaxed">
+                    Target Role: Staff Backend Engineer @ Ramp.<br/>
+                    Verified Match Criteria: Python 3.11, FastAPI, PostgreSQL, Distributed Systems.<br/>
+                    Isolated Skill Gap: Multi-Stage Docker Container non-root deployment.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeConsoleTab === "outreach" && (
+              <div className="space-y-4 font-mono-code text-xs">
+                <div className="flex items-center justify-between text-[#94A3B8] border-b border-[#E2E8F0] pb-2">
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#0891B2]" />
+                    SERVICE: CAREERSCOPE-EMAIL-INTELLIGENCE
+                  </span>
+                  <span className="text-[#10B981] font-semibold">LANGGRAPH AGENT</span>
+                </div>
+                <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg space-y-2">
+                  <div className="font-bold text-[#0F172A]">Recruiter Cover Letter Output:</div>
+                  <p className="text-[#475569] leading-relaxed">
+                    Subject: Application for Staff Backend Engineer — Andrew Musili<br/><br/>
+                    Dear Ramp Hiring Team,<br/>
+                    I have followed Ramp's engineering milestones in high-throughput payment architectures. My background building distributed microservices on GCP Cloud Run with FastAPI directly addresses your current scalability roadmap...
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </section>
+
+      {/* 3. Live Stats Banner */}
+      <section className="bg-white border-y border-[#E2E8F0] py-9">
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="border-l-3 border-[#0891B2] pl-5 space-y-1">
+              <div className="font-mono-code text-3xl font-bold text-[#0F172A]">10,480+</div>
+              <div className="text-xs text-[#475569]">Live tech job listings tracked</div>
+            </div>
+            <div className="border-l-3 border-[#0891B2] pl-5 space-y-1">
+              <div className="font-mono-code text-3xl font-bold text-[#0F172A]">88%</div>
+              <div className="text-xs text-[#475569]">Average role readiness accuracy</div>
+            </div>
+            <div className="border-l-3 border-[#0891B2] pl-5 space-y-1">
+              <div className="font-mono-code text-3xl font-bold text-[#0F172A]">500+</div>
+              <div className="text-xs text-[#475569]">Curated learning paths</div>
+            </div>
+            <div className="border-l-3 border-[#0891B2] pl-5 space-y-1">
+              <div className="font-mono-code text-3xl font-bold text-[#0F172A]">24/7</div>
+              <div className="text-xs text-[#475569]">Continuous market monitoring</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/*  Apple Bento Grid Features */}
-      <section id="architecture" className="py-24 relative">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-indigo-400">Engine Architecture</h2>
-            <p className="text-3xl sm:text-5xl font-bold tracking-tight">Built as a Production Microservice Ecosystem</p>
+      {/* 4. How It Works Section */}
+      <section id="how-it-works" className="py-20 max-w-[1280px] mx-auto px-6 sm:px-8">
+        <div className="max-w-[600px] mb-14 space-y-3">
+          <div className="font-mono-code text-xs font-semibold uppercase tracking-wider text-[#0891B2]">
+            A continuous feedback loop
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
+            How CareerScope Intelligence works
+          </h2>
+          <p className="text-base text-[#475569] leading-relaxed">
+            Four easy steps that help you understand your job readiness and advance your career.
+          </p>
+        </div>
+
+        {/* Process Flow Cards */}
+        <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden divide-y divide-[#E2E8F0] shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+            <div className="bg-[#F8FAFC] p-6 border-r border-[#E2E8F0] font-mono-code text-xs font-bold text-[#0891B2] flex items-center">
+              01 / MARKET SCAN
+            </div>
+            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#0F172A] mb-1">Continuous Market Scanning</h3>
+                <p className="text-sm text-[#475569] max-w-xl">
+                  Monitors job openings from top companies, ATS feeds, and direct job boards in real time.
+                </p>
+              </div>
+              <span className="font-mono-code text-xs bg-[#0F172A] text-[#0891B2] px-3 py-2 rounded-md whitespace-nowrap">
+                14,208 listings indexed
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+            <div className="bg-[#F8FAFC] p-6 border-r border-[#E2E8F0] font-mono-code text-xs font-bold text-[#0891B2] flex items-center">
+              02 / FIT EVALUATION
+            </div>
+            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#0F172A] mb-1">Role Match Evaluation</h3>
+                <p className="text-sm text-[#475569] max-w-xl">
+                  Compares your skills against target role requirements to calculate your exact readiness score.
+                </p>
+              </div>
+              <span className="font-mono-code text-xs bg-[#0F172A] text-[#0891B2] px-3 py-2 rounded-md whitespace-nowrap">
+                Match score: 88%
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+            <div className="bg-[#F8FAFC] p-6 border-r border-[#E2E8F0] font-mono-code text-xs font-bold text-[#0891B2] flex items-center">
+              03 / GAP DIAGNOSIS
+            </div>
+            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#0F172A] mb-1">Skill Gap Diagnosis</h3>
+                <p className="text-sm text-[#475569] max-w-xl">
+                  Highlights the specific technical skills you need to learn to reach your target salary band.
+                </p>
+              </div>
+              <span className="font-mono-code text-xs bg-[#0F172A] text-[#0891B2] px-3 py-2 rounded-md whitespace-nowrap">
+                3 primary gaps isolated
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
+            <div className="bg-[#F8FAFC] p-6 border-r border-[#E2E8F0] font-mono-code text-xs font-bold text-[#0891B2] flex items-center">
+              04 / ROADMAP ROUTING
+            </div>
+            <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#0F172A] mb-1">30-Day Growth Roadmap</h3>
+                <p className="text-sm text-[#475569] max-w-xl">
+                  Generates a practical week-by-week plan with real projects to prepare you for hiring teams.
+                </p>
+              </div>
+              <span className="font-mono-code text-xs bg-[#0F172A] text-[#0891B2] px-3 py-2 rounded-md whitespace-nowrap">
+                Roadmap ready
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Real-Time Market Data Section */}
+      <section id="market" className="py-20 bg-white border-y border-[#E2E8F0]">
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8">
+          <div className="max-w-[600px] mb-14 space-y-3">
+            <div className="font-mono-code text-xs font-semibold uppercase tracking-wider text-[#0891B2]">
+              Real-Time Market Data
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
+              Real market data made simple and clear
+            </h2>
+            <p className="text-base text-[#475569] leading-relaxed">
+              Live salary benchmarks and demand trajectories across high-growth engineering domains.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E2E8F0] rounded-xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-[#E2E8F0] bg-[#F8FAFC] flex justify-between items-center font-mono-code text-xs text-[#475569]">
+              <span>DOMAIN: SOFTWARE & AI ENGINEERING</span>
+              <span>UPDATED: TODAY</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] font-mono-code text-xs uppercase text-[#94A3B8]">
+                  <tr>
+                    <th className="px-6 py-3.5 font-semibold">Target Role</th>
+                    <th className="px-6 py-3.5 font-semibold">Demand Status</th>
+                    <th className="px-6 py-3.5 font-semibold">Median Salary</th>
+                    <th className="px-6 py-3.5 font-semibold">Growth YoY</th>
+                    <th className="px-6 py-3.5 font-semibold">Active Postings</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E2E8F0]">
+                  <tr className="hover:bg-[#F8FAFC]">
+                    <td className="px-6 py-4 font-bold text-[#0F172A]">Staff Backend Engineer</td>
+                    <td className="px-6 py-4 font-mono-code text-xs font-semibold text-[#10B981]">
+                      <span className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5" /> High Demand</span>
+                    </td>
+                    <td className="px-6 py-4 font-mono-code text-[#0F172A]">$185,000</td>
+                    <td className="px-6 py-4 font-mono-code text-[#10B981] font-semibold">+18%</td>
+                    <td className="px-6 py-4 font-mono-code text-[#475569]">1,420</td>
+                  </tr>
+                  <tr className="hover:bg-[#F8FAFC]">
+                    <td className="px-6 py-4 font-bold text-[#0F172A]">ML Infrastructure Engineer</td>
+                    <td className="px-6 py-4 font-mono-code text-xs font-semibold text-[#10B981]">
+                      <span className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5" /> High Demand</span>
+                    </td>
+                    <td className="px-6 py-4 font-mono-code text-[#0F172A]">$192,000</td>
+                    <td className="px-6 py-4 font-mono-code text-[#10B981] font-semibold">+24%</td>
+                    <td className="px-6 py-4 font-mono-code text-[#475569]">980</td>
+                  </tr>
+                  <tr className="hover:bg-[#F8FAFC]">
+                    <td className="px-6 py-4 font-bold text-[#0F172A]">Senior Platform Engineer</td>
+                    <td className="px-6 py-4 font-mono-code text-xs font-semibold text-[#10B981]">
+                      <span className="flex items-center gap-1"><TrendingUp className="w-3.5 h-3.5" /> Stable Demand</span>
+                    </td>
+                    <td className="px-6 py-4 font-mono-code text-[#0F172A]">$175,000</td>
+                    <td className="px-6 py-4 font-mono-code text-[#10B981] font-semibold">+12%</td>
+                    <td className="px-6 py-4 font-mono-code text-[#475569]">2,100</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. 30-Day Growth Roadmap Section */}
+      <section id="roadmap" className="py-20 max-w-[1280px] mx-auto px-6 sm:px-8">
+        <div className="max-w-[600px] mb-14 space-y-3">
+          <div className="font-mono-code text-xs font-semibold uppercase tracking-wider text-[#0891B2]">
+            Actionable Execution
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
+            Turn skill gaps into a 30-day plan
+          </h2>
+          <p className="text-base text-[#475569] leading-relaxed">
+            A structured step-by-step roadmap that prepares you for high-paying roles.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-start">
+            <div className="font-mono-code text-sm font-bold text-[#0891B2] pt-3">WEEK 01</div>
+            <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 space-y-3 shadow-sm">
+              <h4 className="text-base font-bold text-[#0F172A]">Kubernetes & Microservice Deployment</h4>
+              <div className="flex flex-wrap gap-2">
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Course: K8s Production Architecture
+                </span>
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Project: Deploy multi-stage container
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-start">
+            <div className="font-mono-code text-sm font-bold text-[#0891B2] pt-3">WEEK 02</div>
+            <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 space-y-3 shadow-sm">
+              <h4 className="text-base font-bold text-[#0F172A]">System Design & High Availability</h4>
+              <div className="flex flex-wrap gap-2">
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Guide: Distributed Caching & Queues
+                </span>
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Project: Build Redis / Event Queue
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-start">
+            <div className="font-mono-code text-sm font-bold text-[#0891B2] pt-3">WEEK 03</div>
+            <div className="bg-white border border-[#E2E8F0] rounded-lg p-5 space-y-3 shadow-sm">
+              <h4 className="text-base font-bold text-[#0F172A]">AI Model Evaluation & Monitoring</h4>
+              <div className="flex flex-wrap gap-2">
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Guide: Gemini / LLM Evaluation Harness
+                </span>
+                <span className="font-mono-code text-xs bg-[#F8FAFC] border border-[#E2E8F0] px-2.5 py-1 rounded text-[#475569]">
+                  Project: Automated telemetry system
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Testimonials Section */}
+      <section className="py-20 bg-white border-y border-[#E2E8F0]">
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8">
+          <div className="max-w-[600px] mb-14 space-y-3">
+            <div className="font-mono-code text-xs font-semibold uppercase tracking-wider text-[#0891B2]">
+              Verified Results
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F172A]">
+              Trusted by software professionals
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Bento Card 1 */}
-            <div className="md:col-span-2 p-8 rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 backdrop-blur-xl relative overflow-hidden group hover:border-cyan-500/40 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-950/80 border border-cyan-500/30 flex items-center justify-center mb-6">
-                <Globe2 className="w-6 h-6 text-cyan-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Multi-Source Global Ingestion</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-                Continuous serverless scrapers poll 10+ job APIs and internship repositories in parallel, applying cryptographic hash deduplication before writing to serverless PostgreSQL.
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <p className="text-sm text-[#475569] leading-relaxed">
+                "I finally knew why I wasn't getting past initial screenings. Kubernetes was the single gap holding back my application for Staff roles."
               </p>
+              <div>
+                <div className="text-sm font-bold text-[#0F172A]">Amara Chen</div>
+                <div className="text-xs font-mono-code text-[#94A3B8]">Backend Engineer → Staff Engineer</div>
+              </div>
             </div>
 
-            {/* Bento Card 2 */}
-            <div className="p-8 rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 backdrop-blur-xl relative overflow-hidden group hover:border-indigo-500/40 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-500/30 flex items-center justify-center mb-6">
-                <Bot className="w-6 h-6 text-indigo-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Pydantic Match Engine</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Evaluates candidate profiles against target roles with structured Pydantic models & Gemini 2.5 Flash reasoning.
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <p className="text-sm text-[#475569] leading-relaxed">
+                "The 30-day plan replaced random tutorials. It gave me the exact project steps that recruiters actually cared about."
               </p>
+              <div>
+                <div className="text-sm font-bold text-[#0F172A]">David Osei</div>
+                <div className="text-xs font-mono-code text-[#94A3B8]">Platform Engineer</div>
+              </div>
             </div>
 
-            {/* Bento Card 3 */}
-            <div className="p-8 rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 backdrop-blur-xl relative overflow-hidden group hover:border-purple-500/40 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-purple-950/80 border border-purple-500/30 flex items-center justify-center mb-6">
-                <BookOpen className="w-6 h-6 text-purple-400" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">30-Day Skill Growth Roadmap</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Transforms rejection feedback into step-by-step skill learning paths to ensure continuous career advancement.
+            <div className="bg-white border border-[#E2E8F0] rounded-xl p-7 flex flex-col justify-between space-y-6 shadow-sm">
+              <p className="text-sm text-[#475569] leading-relaxed">
+                "It feels like having an executive career advisor checking market data 24/7. Simple, precise, and completely effective."
               </p>
-            </div>
-
-            {/* Bento Card 4 */}
-            <div className="md:col-span-2 p-8 rounded-3xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 backdrop-blur-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center mb-6">
-                <Mail className="w-6 h-6 text-emerald-400" />
+              <div>
+                <div className="text-sm font-bold text-[#0F172A]">Priya Nair</div>
+                <div className="text-xs font-mono-code text-[#94A3B8]">Data Scientist</div>
               </div>
-              <h3 className="text-2xl font-bold mb-3">LangGraph Recruiter Email Co-Pilot</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-                Automates recruiter outreach, auto-applies with tailored cover letters, and handles automated 7-day follow-ups via Gmail push webhooks.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/*  Live Telemetry Metrics */}
-      <section id="telemetry" className="py-20 border-y border-white/10 bg-white/[0.01]">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div className="space-y-2">
-            <div className="text-4xl sm:text-5xl font-bold text-cyan-400 font-mono">6</div>
-            <div className="text-xs font-mono text-zinc-400 uppercase">Cloud Run Services</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-4xl sm:text-5xl font-bold text-indigo-400 font-mono">74+</div>
-            <div className="text-xs font-mono text-zinc-400 uppercase">Live Active Jobs</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-4xl sm:text-5xl font-bold text-purple-400 font-mono">9</div>
-            <div className="text-xs font-mono text-zinc-400 uppercase">Serverless Scrapers</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-4xl sm:text-5xl font-bold text-emerald-400 font-mono">100%</div>
-            <div className="text-xs font-mono text-zinc-400 uppercase">Automated Rhythm</div>
-          </div>
-        </div>
-      </section>
-
-      {/*  Final Cinematic Call To Action */}
-      <section className="py-32 relative overflow-hidden text-center">
-        <div className="absolute inset-0 bg-gradient-to-tr from-cyan-600/10 via-indigo-600/10 to-purple-600/10 blur-3xl pointer-events-none -z-10" />
-        <div className="max-w-4xl mx-auto px-6 space-y-8">
-          <h2 className="text-4xl sm:text-6xl font-bold tracking-tight">
-            Ready to Put Your Career Growth on Autopilot?
+      {/* 8. Final CTA Card */}
+      <section id="pricing" className="py-20 max-w-[1280px] mx-auto px-6 sm:px-8">
+        <div className="bg-[#0F172A] rounded-2xl p-12 sm:p-16 text-center text-white space-y-6 shadow-xl">
+          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+            Run your career with precision.
           </h2>
-          <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-            Join developers and engineers using CareerScoper to discover opportunities, upgrade their skills, and land their target roles.
+          <p className="text-base text-[#94A3B8] max-w-lg mx-auto">
+            Start your free analysis today. No credit card required. Setup takes under two minutes.
           </p>
-          <div className="pt-4">
-            <Link
-              href="#console"
-              className="inline-flex items-center gap-3 px-10 py-5 text-lg font-semibold rounded-full bg-white text-black hover:bg-zinc-200 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:scale-105"
-            >
+          <div>
+            <Link href="/signup" className="btn-cyan-nav text-sm px-8 py-3.5 inline-flex items-center gap-2">
               <span>Get Started Free</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/*  Translucent Footer */}
-      <footer className="py-12 border-t border-white/10 text-xs text-zinc-500 text-center font-mono">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>© 2026 CareerScoper AI Platform. All rights reserved.</div>
-          <div className="flex gap-6">
-            <a href="https://careerscope-backend-786345663105.us-central1.run.app/admin/" className="hover:text-white transition-colors">Admin API</a>
-            <a href="https://careerscope-ingestion-786345663105.us-central1.run.app/health" className="hover:text-white transition-colors">Ingestion Health</a>
-            <a href="https://careerscope-decision-engine-786345663105.us-central1.run.app/health" className="hover:text-white transition-colors">Decision Engine Health</a>
+      {/* 9. Footer */}
+      <footer className="bg-white border-t border-[#E2E8F0] py-14">
+        <div className="max-w-[1280px] mx-auto px-6 sm:px-8 space-y-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-3">
+              <Link href="/" className="flex items-center gap-2.5">
+                <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2" fill="none" />
+                  <line x1="16" y1="6" x2="16" y2="26" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
+                  <line x1="6" y1="16" x2="26" y2="16" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
+                  <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
+                  <circle cx="22" cy="10" r="1.5" fill="#F59E0B" opacity="0.8" />
+                  <circle cx="10" cy="22" r="1.5" fill="#F59E0B" opacity="0.8" />
+                </svg>
+                <span className="brand-title text-lg">
+                  Career<span className="cyan-text">Scope</span>
+                </span>
+              </Link>
+              <p className="text-xs text-[#475569] max-w-xs leading-relaxed">
+                Career intelligence system for software engineers, product leaders, and ambitious builders.
+              </p>
+            </div>
+
+            <div className="space-y-2 font-mono-code text-xs">
+              <h5 className="font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Product</h5>
+              <div><a href="#how-it-works" className="text-[#475569] hover:text-[#0891B2] transition-colors">How it works</a></div>
+              <div><a href="#market" className="text-[#475569] hover:text-[#0891B2] transition-colors">Market Data</a></div>
+              <div><a href="#roadmap" className="text-[#475569] hover:text-[#0891B2] transition-colors">30-Day Growth</a></div>
+              <div><a href="#pricing" className="text-[#475569] hover:text-[#0891B2] transition-colors">Pricing</a></div>
+            </div>
+
+            <div className="space-y-2 font-mono-code text-xs">
+              <h5 className="font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Microservices</h5>
+              <div><a href="https://careerscope-backend-786345663105.us-central1.run.app/admin/" className="text-[#475569] hover:text-[#0891B2] transition-colors">Django REST Backend</a></div>
+              <div><a href="https://careerscope-ingestion-786345663105.us-central1.run.app/health" className="text-[#475569] hover:text-[#0891B2] transition-colors">Data Ingestion</a></div>
+              <div><a href="https://careerscope-decision-engine-786345663105.us-central1.run.app/health" className="text-[#475569] hover:text-[#0891B2] transition-colors">Decision Engine</a></div>
+              <div><a href="https://careerscope-email-intelligence-786345663105.us-central1.run.app/health" className="text-[#475569] hover:text-[#0891B2] transition-colors">Email Intelligence</a></div>
+            </div>
+
+            <div className="space-y-2 font-mono-code text-xs">
+              <h5 className="font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Company</h5>
+              <div><a href="#" className="text-[#475569] hover:text-[#0891B2] transition-colors">About</a></div>
+              <div><a href="#" className="text-[#475569] hover:text-[#0891B2] transition-colors">Privacy Policy</a></div>
+              <div><a href="#" className="text-[#475569] hover:text-[#0891B2] transition-colors">Terms of Service</a></div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#E2E8F0] pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-[#94A3B8] font-mono-code gap-3">
+            <span>© 2026 CareerScope Inc. All rights reserved.</span>
+            <span>Built for professionals who measure progress with data.</span>
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

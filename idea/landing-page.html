@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerScope — Career Intelligence System</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Canonical CareerScope Brand Colors */
+      --bg-page: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-terminal-header: #F1F5F9;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-subtle: #94A3B8;
+      --border-color: #E2E8F0;
+      
+      /* Primary Brand Color: Cyan-600 */
+      --primary-cyan: #0891B2;
+      --primary-cyan-hover: #0E7490;
+      --primary-cyan-bg: rgba(8, 145, 178, 0.08);
+      --primary-cyan-border: rgba(8, 145, 178, 0.25);
+      
+      /* Accent Amber */
+      --accent-amber: #F59E0B;
+      --accent-amber-bg: rgba(245, 158, 11, 0.12);
+      
+      /* Status Emerald */
+      --accent-green: #10B981;
+      --accent-green-bg: #ECFDF5;
+      --accent-green-border: #A7F3D0;
+      
+      --btn-dark: #0F172A;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* Top Navigation Header (Centered & Max-Width Constrained) */
+    header {
+      width: 100%;
+      height: 72px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      height: 100%;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-title span.cyan-text {
+      color: var(--primary-cyan);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.15s ease;
+    }
+
+    nav a:hover {
+      color: var(--primary-cyan);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-login {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      text-decoration: none;
+      padding: 8px 16px;
+    }
+
+    .btn-cyan-nav {
+      background-color: var(--primary-cyan);
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-cyan-nav:hover {
+      background-color: var(--primary-cyan-hover);
+    }
+
+    /* Hero Section */
+    .hero-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 32px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* Left Hero Column */
+    .hero-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 520px;
+      padding-right: 12px;
+    }
+
+    .hero-top {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-title {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+
+    .hero-title span.accent {
+      color: var(--primary-cyan);
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn-primary-dark {
+      background-color: var(--btn-dark);
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-primary-dark:hover {
+      background-color: #1E293B;
+    }
+
+    .btn-secondary-outline {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-secondary-outline:hover {
+      background-color: var(--bg-page);
+    }
+
+    .hero-footer-signal {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-subtle);
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+    }
+
+    .hero-footer-signal strong {
+      color: var(--text-main);
+    }
+
+    /* Right Terminal Window */
+    .terminal-window {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-header {
+      background: var(--bg-terminal-header);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .terminal-header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-feed-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--accent-green);
+      background: var(--accent-green-bg);
+      border: 1px solid var(--accent-green-border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+
+    /* Left Stats Column inside Terminal */
+    .stats-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .career-score-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .score-max {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-subtle);
+    }
+
+    .score-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary-cyan);
+      background: var(--primary-cyan-bg);
+      border: 1px solid var(--primary-cyan-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #F1F5F9;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-bar-fill {
+      width: 78%;
+      height: 100%;
+      background: var(--primary-cyan);
+      border-radius: 99px;
+    }
+
+    .progress-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .skills-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--primary-cyan);
+      background: var(--primary-cyan-bg);
+      border: 1px solid var(--primary-cyan-border);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Right Main Panel inside Terminal */
+    .main-terminal-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .top-metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .metric-note {
+      font-size: 11px;
+      color: var(--text-subtle);
+      margin-top: 4px;
+    }
+
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .table-header-bar {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-page);
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .match-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-green);
+      background: var(--accent-green-bg);
+      border: 1px solid var(--accent-green-border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Stats Banner */
+    .stats-banner {
+      background: var(--bg-card);
+      border-y: 1px solid var(--border-color);
+      padding: 36px 0;
+      margin-top: 40px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .stat-box {
+      border-left: 3px solid var(--primary-cyan);
+      padding-left: 20px;
+    }
+
+    .stat-number {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Section Scaffolding */
+    section {
+      padding: 96px 0;
+    }
+
+    .sec-header {
+      max-width: 600px;
+      margin-bottom: 56px;
+    }
+
+    .sec-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary-cyan);
+      margin-bottom: 12px;
+    }
+
+    .sec-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .sec-desc {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Process Flow */
+    .process-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .process-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .process-row:last-child {
+      border-bottom: none;
+    }
+
+    .process-num {
+      background: var(--bg-page);
+      padding: 28px;
+      border-right: 1px solid var(--border-color);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-cyan);
+      display: flex;
+      align-items: center;
+    }
+
+    .process-content {
+      padding: 28px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .process-text h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .process-text p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    .process-metric-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--btn-dark);
+      color: var(--primary-cyan);
+      padding: 8px 14px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    /* Market Data Table */
+    .market-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .market-top {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-page);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    table.market-data {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table.market-data th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border-color);
+      background: #F8FAFC;
+    }
+
+    table.market-data td {
+      padding: 18px 28px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table.market-data tr:last-child td {
+      border-bottom: none;
+    }
+
+    .trend-up {
+      color: var(--accent-green);
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    /* 30-Day Growth Roadmap Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 24px;
+    }
+
+    .timeline-week {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-cyan);
+      padding-top: 4px;
+    }
+
+    .timeline-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+
+    .timeline-card h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .timeline-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Testimonials Grid */
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .test-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .test-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .test-author {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .test-role {
+      font-size: 12px;
+      color: var(--text-subtle);
+      font-family: var(--font-mono);
+    }
+
+    /* Final CTA */
+    .cta-card {
+      background: var(--btn-dark);
+      border-radius: 16px;
+      padding: 72px 48px;
+      text-align: center;
+      color: #FFFFFF;
+    }
+
+    .cta-card h2 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .cta-card p {
+      font-size: 17px;
+      color: var(--text-subtle);
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 64px 0 36px;
+      background: var(--bg-card);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      max-width: 280px;
+    }
+
+    .footer-col h5 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color 0.15s;
+    }
+
+    .footer-col a:hover {
+      color: var(--primary-cyan);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    /* Responsive */
+    @media (max-width: 1080px) {
+      .hero-container { grid-template-columns: 1fr; }
+      .terminal-body { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .process-row { grid-template-columns: 1fr; }
+      .process-num { border-right: none; border-bottom: 1px solid var(--border-color); }
+      .process-content { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="nav-wrap">
+      <a href="#" class="brand">
+        <svg class="logo-svg" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="14" stroke="#0891B2" stroke-width="2" fill="none" />
+          <line x1="16" y1="6" x2="16" y2="26" stroke="#0891B2" stroke-width="1.5" opacity="0.6" />
+          <line x1="6" y1="16" x2="26" y2="16" stroke="#0891B2" stroke-width="1.5" opacity="0.6" />
+          <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
+          <circle cx="22" cy="10" r="1.5" fill="#F59E0B" opacity="0.8" />
+          <circle cx="10" cy="22" r="1.5" fill="#F59E0B" opacity="0.8" />
+        </svg>
+        <span class="brand-title">Career<span class="cyan-text">Scope</span></span>
+      </a>
+
+      <nav>
+        <a href="#how-it-works">How it works</a>
+        <a href="#market">Market Data</a>
+        <a href="#roadmap">Growth Roadmap</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#" class="btn-login">Sign In</a>
+        <a href="#" class="btn-cyan-nav">Get Started Free →</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Main Section -->
+  <div class="hero-container">
+    <!-- Left Hero Column -->
+    <div class="hero-col">
+      <div class="hero-top">
+        <h1 class="hero-title">
+          Run your career with <span class="accent">precision & data.</span>
+        </h1>
+
+        <p class="hero-desc">
+          CareerScope reads global job market signals continuously, scores your exact readiness against target roles, and delivers a 30-day execution plan to close your skill gaps. Evidence, not encouragement.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#" class="btn-primary-dark">Run Free Career Analysis →</a>
+          <a href="#simulation" class="btn-secondary-outline">Explore Live Simulation</a>
+        </div>
+      </div>
+
+      <div class="hero-footer-signal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        <span>STATUS: <strong>14,208 Listings Monitored</strong></span>
+      </div>
+    </div>
+
+    <!-- Right Terminal Window -->
+    <div class="terminal-window" id="simulation">
+      <div class="terminal-header">
+        <div class="terminal-header-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>careerscope // live-telemetry</span>
+        </div>
+        <span class="live-feed-badge">● LIVE FEED</span>
+      </div>
+
+      <div class="terminal-body">
+        <!-- Left Stats Column -->
+        <div class="stats-col">
+          <div class="card">
+            <div class="card-label">
+              <span>Career Score</span>
+              <span class="score-badge">+34 pts</span>
+            </div>
+            <div class="career-score-value">
+              782 <span class="score-max">/ 900</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-status">Readiness: High (Top 8%)</div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Priority Skill Gaps</div>
+            <div class="skills-flex">
+              <span class="skill-tag">Kubernetes</span>
+              <span class="skill-tag">System Architecture</span>
+              <span class="skill-tag">LLM Evaluation</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Main Panel -->
+        <div class="main-terminal-panel">
+          <div class="top-metric-row">
+            <div class="metric-card">
+              <div class="card-label">Target Role Fit</div>
+              <div class="metric-value" style="color: var(--primary-cyan);">88%</div>
+              <div class="metric-note">vs Staff Engineer</div>
+            </div>
+            <div class="metric-card">
+              <div class="card-label">Salary Band</div>
+              <div class="metric-value">$185k</div>
+              <div class="metric-note">+18% vs current</div>
+            </div>
+            <div class="metric-card">
+              <div class="card-label">Inbound Recruiter</div>
+              <div class="metric-value">8</div>
+              <div class="metric-note">this week</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <div class="table-header-bar">
+              <span>Live Market Match Stream</span>
+              <span>Updated Just Now</span>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Target Company</th>
+                  <th>Role</th>
+                  <th style="text-align: right;">Match Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600;">Ramp</td>
+                  <td>Staff Backend Engineer</td>
+                  <td style="text-align: right;"><span class="match-pill">94%</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Vercel</td>
+                  <td>Senior Platform Engineer</td>
+                  <td style="text-align: right;"><span class="match-pill">91%</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600;">Stripe</td>
+                  <td>Staff Software Engineer</td>
+                  <td style="text-align: right;"><span class="match-pill">89%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Stats Banner -->
+  <div class="stats-banner">
+    <div class="wrap">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-number">10,480+</div>
+          <div class="stat-label">Live tech job listings tracked</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">88%</div>
+          <div class="stat-label">Average role readiness accuracy</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Curated learning paths</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Continuous market monitoring</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works">
+    <div class="wrap">
+      <div class="sec-header">
+        <div class="sec-eyebrow">A continuous feedback loop</div>
+        <h2 class="sec-title">How CareerScope Intelligence works</h2>
+        <p class="sec-desc">Four synchronized steps that turn market signals into your clear personal career progression.</p>
+      </div>
+
+      <div class="process-card">
+        <div class="process-row">
+          <div class="process-num">01 / MARKET SCAN</div>
+          <div class="process-content">
+            <div class="process-text">
+              <h3>Continuous Market Scanning</h3>
+              <p>Monitors global openings from top companies, ATS feeds, and direct job boards in real time.</p>
+            </div>
+            <div class="process-metric-tag">14,208 listings indexed</div>
+          </div>
+        </div>
+
+        <div class="process-row">
+          <div class="process-num">02 / FIT EVALUATION</div>
+          <div class="process-content">
+            <div class="process-text">
+              <h3>Role Match Evaluation</h3>
+              <p>Evaluates your current technical profile against exact target role requirements to calculate your readiness.</p>
+            </div>
+            <div class="process-metric-tag">Match score: 88%</div>
+          </div>
+        </div>
+
+        <div class="process-row">
+          <div class="process-num">03 / GAP DIAGNOSIS</div>
+          <div class="process-content">
+            <div class="process-text">
+              <h3>Skill Gap Diagnosis</h3>
+              <p>Identifies exact technical capabilities you lack, ranked by importance for your target salary band.</p>
+            </div>
+            <div class="process-metric-tag">3 primary gaps isolated</div>
+          </div>
+        </div>
+
+        <div class="process-row">
+          <div class="process-num">04 / ROADMAP ROUTING</div>
+          <div class="process-content">
+            <div class="process-text">
+              <h3>30-Day Growth Roadmap</h3>
+              <p>Generates a week-by-week execution plan with projects and checkpoints to make you un-rejectable.</p>
+            </div>
+            <div class="process-metric-tag">Roadmap ready</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Market Data Section -->
+  <section id="market" style="background: var(--bg-card);">
+    <div class="wrap">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Real-Time Market Data</div>
+        <h2 class="sec-title">The data recruiters see, readable by you</h2>
+        <p class="sec-desc">Live salary benchmarks and demand trajectories across high-growth engineering domains.</p>
+      </div>
+
+      <div class="market-box">
+        <div class="market-top">
+          <span>DOMAIN: SOFTWARE & AI ENGINEERING</span>
+          <span>UPDATED: TODAY</span>
+        </div>
+
+        <table class="market-data">
+          <thead>
+            <tr>
+              <th>Target Role</th>
+              <th>Demand Status</th>
+              <th>Median Salary</th>
+              <th>Growth YoY</th>
+              <th>Active Postings</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: 700;">Staff Backend Engineer</td>
+              <td><span class="trend-up">▲ High Demand</span></td>
+              <td style="font-family: var(--font-mono);">$185,000</td>
+              <td style="font-family: var(--font-mono); color: var(--accent-green);">+18%</td>
+              <td style="font-family: var(--font-mono);">1,420</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 700;">ML Infrastructure Engineer</td>
+              <td><span class="trend-up">▲ High Demand</span></td>
+              <td style="font-family: var(--font-mono);">$192,000</td>
+              <td style="font-family: var(--font-mono); color: var(--accent-green);">+24%</td>
+              <td style="font-family: var(--font-mono);">980</td>
+            </tr>
+            <tr>
+              <td style="font-weight: 700;">Senior Platform Engineer</td>
+              <td><span class="trend-up">▲ Stable Demand</span></td>
+              <td style="font-family: var(--font-mono);">$175,000</td>
+              <td style="font-family: var(--font-mono); color: var(--accent-green);">+12%</td>
+              <td style="font-family: var(--font-mono);">2,100</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 30-Day Growth Roadmap Section -->
+  <section id="roadmap">
+    <div class="wrap">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Actionable Execution</div>
+        <h2 class="sec-title">Turn skill gaps into a 30-day plan</h2>
+        <p class="sec-desc">A structured step-by-step roadmap that prepares you for high-paying roles.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-week">WEEK 01</div>
+          <div class="timeline-card">
+            <h4>Kubernetes & Microservice Deployment</h4>
+            <div class="timeline-tags">
+              <span class="timeline-tag">Course: K8s Production Architecture</span>
+              <span class="timeline-tag">Project: Deploy multi-stage container</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-week">WEEK 02</div>
+          <div class="timeline-card">
+            <h4>System Design & High Availability</h4>
+            <div class="timeline-tags">
+              <span class="timeline-tag">Guide: Distributed Caching & Queues</span>
+              <span class="timeline-tag">Project: Build Redis / Event Queue</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-week">WEEK 03</div>
+          <div class="timeline-card">
+            <h4>AI Model Evaluation & Monitoring</h4>
+            <div class="timeline-tags">
+              <span class="timeline-tag">Guide: Gemini / LLM Evaluation Harness</span>
+              <span class="timeline-tag">Project: Automated telemetry system</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section style="background: var(--bg-card);">
+    <div class="wrap">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Verified Results</div>
+        <h2 class="sec-title">Trusted by software professionals</h2>
+      </div>
+
+      <div class="testimonial-grid">
+        <div class="test-card">
+          <p class="test-body">"I finally knew why I wasn't getting past initial screenings. Kubernetes was the single gap holding back my application for Staff roles."</p>
+          <div>
+            <div class="test-author">Amara Chen</div>
+            <div class="test-role">Backend Engineer → Staff Engineer</div>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <p class="test-body">"The 30-day plan replaced random YouTube tutorials. It gave me the exact project steps that recruiters actually cared about."</p>
+          <div>
+            <div class="test-author">David Osei</div>
+            <div class="test-role">Platform Engineer</div>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <p class="test-body">"It feels like having an executive career advisor checking market data 24/7. Simple, precise, and completely effective."</p>
+          <div>
+            <div class="test-author">Priya Nair</div>
+            <div class="test-role">Data Scientist</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Card -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="cta-card">
+        <h2>Run your career with precision.</h2>
+        <p>Start your free analysis today. No credit card required. Setup takes under two minutes.</p>
+        <a href="#" class="btn-cyan-nav" style="font-size: 14px; padding: 14px 32px; display: inline-block;">Get Started Free →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="brand">
+            <svg class="logo-svg" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="14" stroke="#0891B2" stroke-width="2" fill="none" />
+              <line x1="16" y1="6" x2="16" y2="26" stroke="#0891B2" stroke-width="1.5" opacity="0.6" />
+              <line x1="6" y1="16" x2="26" y2="16" stroke="#0891B2" stroke-width="1.5" opacity="0.6" />
+              <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
+              <circle cx="22" cy="10" r="1.5" fill="#F59E0B" opacity="0.8" />
+              <circle cx="10" cy="22" r="1.5" fill="#F59E0B" opacity="0.8" />
+            </svg>
+            <span class="brand-title">Career<span class="cyan-text">Scope</span></span>
+          </a>
+          <p>Career intelligence system for software engineers, product leaders, and ambitious builders.</p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Product</h5>
+          <a href="#how-it-works">How it works</a>
+          <a href="#market">Market Data</a>
+          <a href="#roadmap">30-Day Growth</a>
+          <a href="#pricing">Pricing</a>
+        </div>
+
+        <div class="footer-col">
+          <h5>Resources</h5>
+          <a href="#">Career Guides</a>
+          <a href="#">Salary Database</a>
+          <a href="#">Skill Benchmarks</a>
+        </div>
+
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="#">About</a>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 CareerScope Inc. All rights reserved.</span>
+        <span>Built for professionals who measure progress with data.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
