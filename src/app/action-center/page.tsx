@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/AppLayout";
 import {
   Sparkles,
   Zap,
@@ -62,15 +63,21 @@ export default function ActionCenterPage() {
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
-        <span className="text-xs font-mono-code text-[#64748B]">Verifying access permissions...</span>
+        <div className="flex flex-col items-center gap-2 animate-pulse">
+          <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2.5" fill="none" />
+            <circle cx="16" cy="16" r="3" fill="#F59E0B" />
+          </svg>
+          <span className="text-lg font-bold text-[#0F172A] tracking-wide">
+            Career<span className="text-[#0891B2]">Scope</span>
+          </span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col">
-      <Navbar />
+    <AppLayout>
 
       <main className="flex-1 max-w-[1280px] w-full mx-auto p-4 sm:p-8 space-y-6">
         
@@ -86,14 +93,28 @@ export default function ActionCenterPage() {
 
         {/* Action Items List */}
         {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
+          <div className="py-16 flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center gap-2 animate-pulse">
+              <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2.5" fill="none" />
+                <circle cx="16" cy="16" r="3" fill="#F59E0B" />
+              </svg>
+              <span className="text-lg font-bold text-[#0F172A] tracking-wide">
+                Career<span className="text-[#0891B2]">Scope</span>
+              </span>
+            </div>
             <span className="text-xs font-mono-code text-[#64748B]">Computing highest impact career actions...</span>
+          </div>
+        ) : actions.length === 0 ? (
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl p-12 text-center space-y-3 shadow-xs">
+            <Zap className="w-10 h-10 text-[#94A3B8] mx-auto" />
+            <h3 className="text-base font-bold text-[#0F172A]">All High-Impact Actions Completed!</h3>
+            <p className="text-xs text-[#64748B]">Your career profile telemetry is currently optimized. Check back after applying or updating skills.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {actions.map((act) => (
-              <div key={act.id} className="bg-white border border-[#E2E8F0] hover:border-[#0891B2]/50 p-6 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+            {actions.map((act, idx) => (
+              <div key={act.id ? String(act.id) : `act-${idx}`} className="bg-white border border-[#E2E8F0] hover:border-[#0891B2]/50 p-6 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-3">
                     <span className="px-2.5 py-0.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-md text-[10px] font-mono-code font-bold text-[#475569]">
@@ -117,6 +138,6 @@ export default function ActionCenterPage() {
         )}
 
       </main>
-    </div>
+    </AppLayout>
   );
 }

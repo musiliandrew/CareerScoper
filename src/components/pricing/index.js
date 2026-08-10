@@ -1,0 +1,8 @@
+export { Header } from "./Header"
+export { Hero } from "./Hero"
+export { FreeCard } from "./FreeCard"
+export { ProCard } from "./ProCard"
+export { PremiumCard } from "./PremiumCard"
+export { ComparisonTable } from "./ComparisonTable"
+export { FAQItem } from "./FAQItem"
+export { Footer } from "./Footer"

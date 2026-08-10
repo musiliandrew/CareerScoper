@@ -14,7 +14,17 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   const headers = new Headers(request.headers);
   headers.delete("host");
 
-  const body = request.method !== "GET" && request.method !== "HEAD" ? await request.text() : undefined;
+  const contentType = request.headers.get("content-type") || "";
+  const isMultipart = contentType.includes("multipart/form-data");
+
+  let body: any = undefined;
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    if (isMultipart) {
+      body = await request.arrayBuffer();
+    } else {
+      body = await request.text();
+    }
+  }
 
   try {
     const res = await fetch(targetUrl, {

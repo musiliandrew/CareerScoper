@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/AppLayout";
 import {
   Target,
   TrendingUp,
@@ -21,7 +22,11 @@ import {
   FileText,
   Compass,
   Circle,
-  X
+  X,
+  Pencil,
+  Check,
+  Trash2,
+  Star
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/api";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -29,6 +34,9 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 interface ProfileData {
   username?: string;
   email?: string;
+  github_url?: string;
+  github_id?: string;
+  google_id?: string;
   preferences?: Array<{ target_role?: string }>;
 }
 
@@ -51,11 +59,39 @@ interface CapabilityNode {
   supported_by_evidence_ids?: string[];
 }
 
+interface SkillItem {
+  id: string;
+  name: string;
+  category?: string;
+  level?: number;
+  yearsExp?: number;
+}
+
+interface RoleMatchItem {
+  rank: number;
+  title: string;
+  badge: string;
+  badge_style?: string;
+  badgeStyle?: string;
+  score: number;
+  matching_skills?: string[];
+  matchingSkills?: string[];
+  verification_score?: number;
+  verificationScore?: number;
+  depth_score?: number;
+  depthScore?: number;
+  freshness_score?: number;
+  freshnessScore?: number;
+  is_primary?: boolean;
+  isPrimary?: boolean;
+}
+
 interface IntelligenceData {
   overall_readiness?: number;
   estimated_time_months?: number;
   updated_capabilities?: CapabilityNode[];
   recommended_actions?: Array<{ id?: string | number; step?: number; title: string; category?: string; impact?: string }>;
+  top_roles?: RoleMatchItem[];
 }
 
 function ProfileContent() {
@@ -69,17 +105,114 @@ function ProfileContent() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [evidenceNodes, setEvidenceNodes] = useState<EvidenceNode[]>([]);
   const [intelligence, setIntelligence] = useState<IntelligenceData | null>(null);
+  const [technicalSkills, setTechnicalSkills] = useState<SkillItem[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [newUrl, setNewUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evidenceSuccess, setEvidenceSuccess] = useState(false);
 
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [skillName, setSkillName] = useState("");
+  const [skillCategory, setSkillCategory] = useState("Programming Language");
+  const [skillLevel, setSkillLevel] = useState(3);
+  const [skillYears, setSkillYears] = useState(1);
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
+
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
   const [cvSuccess, setCvSuccess] = useState(false);
   const [cvError, setCvError] = useState<string | null>(null);
   const [guideDismissed, setGuideDismissed] = useState(false);
+
+  const [isEditingRole, setIsEditingRole] = useState(false);
+  const [roleInput, setRoleInput] = useState("");
+  const [isSavingRole, setIsSavingRole] = useState(false);
+
+  const [isEditingGithubUrl, setIsEditingGithubUrl] = useState(false);
+  const [githubInput, setGithubInput] = useState("");
+  const [isSavingGithub, setIsSavingGithub] = useState(false);
+
+  const handleSaveGithubUrl = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!githubInput.trim()) return;
+    setIsSavingGithub(true);
+    try {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me`, {
+        credentials: "include",
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ github_url: githubInput.trim() }),
+      });
+
+      if (res.ok) {
+        const fresh = githubInput.trim();
+        setProfile((prev: any) => (prev ? { ...prev, github_url: fresh } : prev));
+        setIsEditingGithubUrl(false);
+      }
+    } catch (err) {
+      console.error("Failed to save github_url:", err);
+    } finally {
+      setIsSavingGithub(false);
+    }
+  };
+
+  const handleSaveRole = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!roleInput.trim()) return;
+    setIsSavingRole(true);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      const response = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/1`, {
+        credentials: "include",
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ target_role: roleInput.trim() }),
+      });
+
+      if (response.ok) {
+        setIsEditingRole(false);
+        const newRole = roleInput.trim();
+        
+        setProfile((prev: any) => {
+          if (!prev) return prev;
+          const updatedPrefs = Array.isArray(prev.preferences) && prev.preferences.length > 0
+            ? [{ ...prev.preferences[0], target_role: newRole }, ...prev.preferences.slice(1)]
+            : [{ target_role: newRole }];
+          return {
+            ...prev,
+            target_role: newRole,
+            preferences: updatedPrefs,
+          };
+        });
+        
+        // Re-fetch fresh profile & intelligence summary from backend
+        const [profRes, intelRes] = await Promise.all([
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me`, {
+        credentials: "include", headers }),
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary`, {
+        credentials: "include", headers }),
+        ]);
+        if (profRes.ok) {
+          const profData = await profRes.json();
+          setProfile(profData);
+        }
+        if (intelRes.ok) {
+          const intelData = await intelRes.json();
+          setIntelligence(intelData);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update target role:", err);
+    } finally {
+      setIsSavingRole(false);
+    }
+  };
   const [lastResponse, setLastResponse] = useState<{
     type: string;
     status: number;
@@ -90,25 +223,25 @@ function ProfileContent() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
     async function loadAllData() {
       try {
         const headers = {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         };
 
-        const [profRes, evidRes, intelRes] = await Promise.allSettled([
-          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me/`, { headers }),
-          fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence/`, { headers }),
-          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary/`, { headers }),
+        const [profRes, evidRes, intelRes, skRes] = await Promise.allSettled([
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me`, {
+        credentials: "include", headers }),
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence`, {
+        credentials: "include", headers }),
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary`, {
+        credentials: "include", headers }),
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/skills`, {
+        credentials: "include", headers }),
         ]);
 
         if (profRes.status === "fulfilled") {
           if (profRes.value.status === 401 || profRes.value.status === 403) {
-            localStorage.removeItem("access_token");
             router.replace("/login");
             return;
           }
@@ -129,6 +262,13 @@ function ProfileContent() {
           const intelData = await intelRes.value.json();
           setIntelligence(intelData);
         }
+
+        if (skRes.status === "fulfilled" && skRes.value.ok) {
+          const skData = await skRes.value.json();
+          if (skData?.technicalSkills) {
+            setTechnicalSkills(skData.technicalSkills);
+          }
+        }
       } catch (err) {
         console.error("Error loading profile data", err);
       } finally {
@@ -139,19 +279,119 @@ function ProfileContent() {
     loadAllData();
   }, [isAuthenticated, router]);
 
+  const handleAddManualSkill = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!skillName.trim()) return;
+    setIsAddingSkill(true);
+
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/skills/technical`, {
+        credentials: "include",
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          name: skillName.trim(),
+          category: skillCategory,
+          level: skillLevel,
+          yearsExp: Number(skillYears),
+        }),
+      });
+
+      if (res.ok) {
+        setSkillName("");
+        setShowSkillModal(false);
+        // Refresh skills & intelligence summary
+        const [skRes, intelRes] = await Promise.all([
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/skills`, {
+        credentials: "include", headers }),
+          fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary`, {
+        credentials: "include", headers }),
+        ]);
+        if (skRes.ok) {
+          const skData = await skRes.json();
+          if (skData?.technicalSkills) setTechnicalSkills(skData.technicalSkills);
+        }
+        if (intelRes.ok) {
+          const intelData = await intelRes.json();
+          setIntelligence(intelData);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to add skill:", err);
+    } finally {
+      setIsAddingSkill(false);
+    }
+  };
+
+  const handleDeleteSkill = async (skillId: string) => {
+    try {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/skills/${skillId}/`, {
+        credentials: "include",
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setTechnicalSkills((prev) => prev.filter((s) => s.id !== skillId));
+        const intelRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary`, {
+        credentials: "include" });
+        if (intelRes.ok) {
+          const intelData = await intelRes.json();
+          setIntelligence(intelData);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete skill:", err);
+    }
+  };
+
+  const handleUpdateSkill = async (skillId: string, updates: { yearsExp?: number; level?: number }) => {
+    if (skillId.startsWith("cap-")) return;
+
+    try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      // Optimistically update local state
+      setTechnicalSkills((prev) =>
+        prev.map((s) => (s.id === skillId ? { ...s, ...updates } : s))
+      );
+
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/skills/technical/${skillId}/`, {
+        credentials: "include",
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(updates),
+      });
+
+      if (res.ok) {
+        const intelRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/card/summary`, {
+        credentials: "include", headers });
+        if (intelRes.ok) {
+          const intelData = await intelRes.json();
+          setIntelligence(intelData);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update skill experience:", err);
+    }
+  };
+
   const handleAddEvidence = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl) return;
 
     setIsSubmitting(true);
     setEvidenceSuccess(false);
-    const token = localStorage.getItem("access_token");
-
     try {
-      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence/submit/`, {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence/submit`, {
+        credentials: "include",
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ url: newUrl }),
@@ -169,8 +409,8 @@ function ProfileContent() {
         setNewUrl("");
         setEvidenceSuccess(true);
         // Refresh evidence list
-        const evidRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence/`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const evidRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/evidence`, {
+        credentials: "include"
         });
         if (evidRes.ok) {
           const evidData = await evidRes.json();
@@ -191,17 +431,15 @@ function ProfileContent() {
     setIsUploadingCv(true);
     setCvSuccess(false);
     setCvError(null);
-    const token = localStorage.getItem("access_token");
-
     try {
       const formData = new FormData();
       formData.append("cv", cvFile);
 
-      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/cv_upload/`, {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/cv_upload`, {
+        credentials: "include",
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          },
         body: formData,
       });
 
@@ -217,8 +455,8 @@ function ProfileContent() {
         setCvSuccess(true);
         setCvFile(null);
         // Refresh profile data
-        const profRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me/`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const profRes = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me`, {
+        credentials: "include"
         });
         if (profRes.ok) {
           const profData = await profRes.json();
@@ -235,20 +473,151 @@ function ProfileContent() {
     }
   };
 
-  const targetRole = profile?.preferences?.[0]?.target_role || "Software Engineer";
-  const progress = intelligence?.overall_readiness || 68;
-  const estimatedTime = intelligence?.estimated_time_months
-    ? `${intelligence.estimated_time_months} Months`
-    : "3 Months";
+  const targetRole =
+    profile?.preferences?.[0]?.target_role ||
+    (profile?.preferences as any)?.target_role ||
+    (profile as any)?.target_role ||
+    "Software Engineer";
 
   const capabilities = intelligence?.updated_capabilities || [];
   const actions = intelligence?.recommended_actions || [];
 
+  const combinedSkills = React.useMemo(() => {
+    const list: SkillItem[] = [...technicalSkills];
+    const existingNames = new Set(list.map((s) => s.name.toLowerCase()));
+
+    if (Array.isArray(capabilities)) {
+      capabilities.forEach((cap) => {
+        if (cap.name && !existingNames.has(cap.name.toLowerCase())) {
+          list.push({
+            id: `cap-${cap.name}`,
+            name: cap.name,
+            category: "Auto-Extracted",
+            level: Math.min(5, Math.max(1, Math.round(((cap.capability_score || cap.verification_score || 80) / 100) * 5))),
+            yearsExp: 1,
+          });
+          existingNames.add(cap.name.toLowerCase());
+        }
+      });
+    }
+
+    return list;
+  }, [technicalSkills, capabilities]);
+
+  const hasUserSkills = combinedSkills.length > 0;
+
+  const progress = React.useMemo(() => {
+    if (typeof intelligence?.overall_readiness === "number" && intelligence.overall_readiness > 0) {
+      return Math.round(intelligence.overall_readiness);
+    }
+    if (!hasUserSkills) return 0;
+    const totalLevel = combinedSkills.reduce((sum, s) => sum + (s.level || 3), 0);
+    const avgLevelRatio = combinedSkills.length > 0 ? (totalLevel / (combinedSkills.length * 5)) : 0.6;
+    return Math.min(95, Math.max(10, Math.round((combinedSkills.length / 12) * 50 + avgLevelRatio * 40)));
+  }, [intelligence, combinedSkills, hasUserSkills]);
+
+  const estimatedTime = React.useMemo(() => {
+    if (!hasUserSkills) return "N/A";
+    if (intelligence?.estimated_time_months) {
+      return `${intelligence.estimated_time_months} Months`;
+    }
+    if (progress >= 80) return "1 Month";
+    if (progress >= 60) return "2 Months";
+    if (progress >= 40) return "3 Months";
+    return "6 Months";
+  }, [hasUserSkills, intelligence, progress]);
+
+  const top3Roles = React.useMemo(() => {
+    if (Array.isArray(intelligence?.top_roles) && intelligence.top_roles.length === 3) {
+      return intelligence.top_roles.map((r: any) => ({
+        rank: r.rank,
+        title: r.title,
+        badge: r.badge || (r.is_primary ? "Primary Target Role" : "Related Alternative Role"),
+        badgeStyle: r.badge_style || (r.is_primary ? "bg-[#0891B2]/10 text-[#0891B2] border-[#0891B2]/20" : "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20"),
+        score: r.score,
+        matchingSkills: r.matching_skills || [],
+        verificationScore: r.verification_score || 0,
+        depthScore: r.depth_score || 0,
+        freshnessScore: r.freshness_score || 0,
+        isPrimary: Boolean(r.is_primary)
+      }));
+    }
+
+    const primaryRole = targetRole || "Software Engineer";
+    
+    let secondaryRole = "Data Scientist";
+    let tertiaryRole = "MLOps & Backend Engineer";
+
+    const roleLower = primaryRole.toLowerCase();
+    if (roleLower.includes("ml") || roleLower.includes("machine learning") || roleLower.includes("ai")) {
+      secondaryRole = "Data Scientist";
+      tertiaryRole = "MLOps & Data Engineer";
+    } else if (roleLower.includes("data")) {
+      secondaryRole = "Machine Learning Engineer";
+      tertiaryRole = "Quantitative Analyst";
+    } else if (roleLower.includes("full") || roleLower.includes("web") || roleLower.includes("frontend")) {
+      secondaryRole = "Full Stack Developer";
+      tertiaryRole = "Cloud System Architect";
+    } else if (roleLower.includes("quant") || roleLower.includes("finance")) {
+      secondaryRole = "Quantitative Developer";
+      tertiaryRole = "Risk & Financial Analyst";
+    }
+
+    const topSkillNames = combinedSkills.slice(0, 5).map((s) => s.name);
+    const skillSample = topSkillNames.length > 0 ? topSkillNames : ["Python", "System Design", "Git"];
+
+    return [
+      {
+        rank: 1,
+        title: primaryRole,
+        badge: "Primary Target Role",
+        badgeStyle: "bg-[#0891B2]/10 text-[#0891B2] border-[#0891B2]/20",
+        score: progress,
+        matchingSkills: skillSample,
+        verificationScore: hasUserSkills ? Math.min(95, progress + 3) : 0,
+        depthScore: hasUserSkills ? Math.min(90, progress - 2) : 0,
+        freshnessScore: hasUserSkills ? 92 : 0,
+        isPrimary: true
+      },
+      {
+        rank: 2,
+        title: secondaryRole,
+        badge: "High Synergy Alternative",
+        badgeStyle: "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20",
+        score: hasUserSkills ? Math.max(10, progress - 5) : 0,
+        matchingSkills: skillSample.slice(0, 3),
+        verificationScore: hasUserSkills ? Math.max(10, progress - 4) : 0,
+        depthScore: hasUserSkills ? Math.max(10, progress - 6) : 0,
+        freshnessScore: hasUserSkills ? 88 : 0,
+        isPrimary: false
+      },
+      {
+        rank: 3,
+        title: tertiaryRole,
+        badge: "Adjacent Growth Role",
+        badgeStyle: "bg-[#8B5CF6]/10 text-[#8B5CF6] border-[#8B5CF6]/20",
+        score: hasUserSkills ? Math.max(10, progress - 10) : 0,
+        matchingSkills: skillSample.slice(1, 4),
+        verificationScore: hasUserSkills ? Math.max(10, progress - 8) : 0,
+        depthScore: hasUserSkills ? Math.max(10, progress - 12) : 0,
+        freshnessScore: hasUserSkills ? 85 : 0,
+        isPrimary: false
+      }
+    ];
+  }, [intelligence, targetRole, progress, combinedSkills, hasUserSkills]);
+
   if (authLoading || !isAuthenticated || loading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
-        <span className="text-xs font-mono-code text-[#64748B]">Verifying identity and loading trajectory data...</span>
+        <div className="flex flex-col items-center gap-2 animate-pulse">
+          <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2.5" fill="none" />
+            <circle cx="16" cy="16" r="3" fill="#F59E0B" />
+          </svg>
+          <span className="text-lg font-bold text-[#0F172A] tracking-wide">
+            Career<span className="text-[#0891B2]">Scope</span>
+          </span>
+        </div>
       </div>
     );
   }
@@ -260,7 +629,11 @@ function ProfileContent() {
     !!((profile as any)?.resume_data && Object.keys((profile as any).resume_data).length > 0) ||
     !!((profile as any)?.experiences && (profile as any).experiences.length > 0) ||
     false;
-  const hasEvidence = evidenceNodes.length > 0;
+  const hasEvidence =
+    evidenceNodes.length > 0 ||
+    !!(profile as any)?.github_url ||
+    !!(profile as any)?.portfolio ||
+    evidenceSuccess;
   const hasRole = !!(profile?.preferences?.[0]?.target_role);
   const completedCount = (hasCv ? 1 : 0) + (hasEvidence ? 1 : 0) + (hasRole ? 1 : 0);
 
@@ -381,9 +754,53 @@ function ProfileContent() {
             <Target className="w-3.5 h-3.5" />
             <span>TARGET CAREER ROLE</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A] flex items-center gap-3">
-            {targetRole}
-          </h1>
+          <div className="flex items-center gap-3 pt-1">
+            {isEditingRole ? (
+              <form onSubmit={handleSaveRole} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={roleInput}
+                  onChange={(e) => setRoleInput(e.target.value)}
+                  placeholder="e.g. Quantitative Developer, AI Engineer"
+                  className="px-3 py-1.5 border-2 border-[#0891B2] rounded-xl text-xl sm:text-2xl font-bold text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#0891B2]/50 bg-white"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={isSavingRole}
+                  className="p-2 bg-[#0891B2] hover:bg-[#06b6d4] text-white rounded-xl transition-colors cursor-pointer flex items-center justify-center"
+                  title="Save Target Role"
+                >
+                  {isSavingRole ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingRole(false)}
+                  className="p-2 border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#64748B] rounded-xl transition-colors cursor-pointer"
+                  title="Cancel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center gap-3 group">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A]">
+                  {targetRole}
+                </h1>
+                <button
+                  onClick={() => {
+                    setRoleInput(targetRole);
+                    setIsEditingRole(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg border border-[#E2E8F0] hover:border-[#0891B2] bg-[#F8FAFC] hover:bg-[#0891B2]/10 text-[#64748B] hover:text-[#0891B2] transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+                  title="Edit Target Career Role"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit Role</span>
+                </button>
+              </div>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-[#64748B]">
             Your current career readiness score and estimated progress timeline.
           </p>
@@ -423,6 +840,18 @@ function ProfileContent() {
               >
                 <Network className="w-4 h-4 shrink-0" />
                 <span>Portfolio & Resume</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("skills")}
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-left transition-colors cursor-pointer ${
+                  activeTab === "skills"
+                    ? "bg-[#0891B2] text-white shadow-xs font-bold"
+                    : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+                }`}
+              >
+                <Sparkles className="w-4 h-4 shrink-0" />
+                <span>Skills & Expertise</span>
               </button>
 
               <button
@@ -575,18 +1004,7 @@ function ProfileContent() {
             </form>
           </div>
 
-          {/* Backend Ingestion API Response Viewer */}
-          {lastResponse && (
-            <div className="p-4 border border-[#0891B2]/30 rounded-xl bg-[#0891B2]/5 space-y-2 font-mono-code text-xs">
-              <div className="flex items-center justify-between text-[#0891B2] font-bold">
-                <span>{lastResponse.type} Response ({lastResponse.status} Status)</span>
-                <span className="text-[10px] text-[#64748B]">{lastResponse.timestamp}</span>
-              </div>
-              <pre className="p-3 bg-[#0F172A] text-[#38BDF8] rounded-lg overflow-x-auto text-[11px] leading-relaxed">
-                {JSON.stringify(lastResponse.data, null, 2)}
-              </pre>
-            </div>
-          )}
+
 
           <div className="space-y-3 pt-2">
             <h3 className="text-xs font-mono-code font-bold text-[#64748B] uppercase">Added Portfolio Links ({evidenceNodes.length})</h3>
@@ -613,49 +1031,248 @@ function ProfileContent() {
         </div>
       )}
 
-      {/* TAB 2: THE MIRROR */}
+      {/* TAB: SKILLS & EXPERTISE */}
+      {activeTab === "skills" && (
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#0891B2]" />
+                Skills & Technical Memory
+              </h2>
+              <p className="text-xs text-[#64748B] mt-1">
+                Auto-extracted from your CV and portfolio links, or added manually with proficiency levels.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowSkillModal(!showSkillModal)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0891B2] hover:bg-[#06b6d4] text-white font-semibold text-xs transition-colors shrink-0 cursor-pointer shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{showSkillModal ? "Close Form" : "Add Manual Skill"}</span>
+            </button>
+          </div>
+
+          {/* MANUAL SKILL INPUT FORM */}
+          {showSkillModal && (
+            <form onSubmit={handleAddManualSkill} className="p-5 border-2 border-[#0891B2]/30 rounded-xl bg-[#0891B2]/5 space-y-4">
+              <h3 className="text-xs font-bold font-mono-code text-[#0891B2] uppercase">Add Technical Skill to Memory</h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1">Skill Name</label>
+                  <input
+                    type="text"
+                    value={skillName}
+                    onChange={(e) => setSkillName(e.target.value)}
+                    placeholder="e.g. PyTorch, Kubernetes, PostgreSQL"
+                    className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#0F172A] focus:outline-none focus:border-[#0891B2]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1">Category</label>
+                  <select
+                    value={skillCategory}
+                    onChange={(e) => setSkillCategory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#0F172A] focus:outline-none focus:border-[#0891B2]"
+                  >
+                    <option value="Programming Language">Programming Language</option>
+                    <option value="Framework/Library">Framework / Library</option>
+                    <option value="Database">Database</option>
+                    <option value="Machine Learning / AI">Machine Learning / AI</option>
+                    <option value="Cloud & DevOps">Cloud & DevOps</option>
+                    <option value="General">General Technical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1">Proficiency Level (1 - 5 Stars)</label>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={() => setSkillLevel(star)}
+                        className={`p-1 rounded-md transition-colors cursor-pointer ${
+                          star <= skillLevel ? "text-[#F59E0B]" : "text-[#CBD5E1]"
+                        }`}
+                      >
+                        <Star className="w-5 h-5 fill-current" />
+                      </button>
+                    ))}
+                    <span className="text-xs font-bold text-[#0F172A] ml-2 font-mono-code">{skillLevel} / 5</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] mb-1">Years of Experience</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="40"
+                    step="0.5"
+                    value={skillYears}
+                    onChange={(e) => setSkillYears(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#0F172A] focus:outline-none focus:border-[#0891B2]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSkillModal(false)}
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-[#64748B] hover:bg-white transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingSkill || !skillName.trim()}
+                  className="px-4 py-2 rounded-lg bg-[#0891B2] hover:bg-[#06b6d4] text-white text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {isAddingSkill ? "Saving..." : "Save Skill to Memory"}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* SKILLS DISPLAY GRID */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-mono-code font-bold text-[#64748B] uppercase">Active User Skills ({combinedSkills.length})</h3>
+            {combinedSkills.length === 0 ? (
+              <div className="p-8 text-center border border-dashed border-[#CBD5E1] rounded-xl bg-[#F8FAFC] space-y-2">
+                <Sparkles className="w-8 h-8 text-[#94A3B8] mx-auto" />
+                <div className="text-xs font-bold text-[#475569]">No Skills Added Yet</div>
+                <div className="text-[11px] text-[#64748B]">Upload your CV/Resume or use the button above to add skills manually.</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {combinedSkills.map((sk) => (
+                  <div key={sk.id} className="p-3.5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex items-center justify-between gap-3 hover:border-[#0891B2]/50 transition-colors">
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-[#0F172A] truncate">{sk.name}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#0891B2]/10 text-[#0891B2] text-[10px] font-mono-code font-semibold shrink-0">
+                          {sk.category || "General"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-[#64748B] pt-0.5">
+                        {/* Interactive Star Rating */}
+                        <div className="flex items-center gap-0.5 text-[#F59E0B]" title="Click star to update proficiency level">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => handleUpdateSkill(sk.id, { level: star })}
+                              className="focus:outline-none cursor-pointer"
+                            >
+                              <Star className={`w-3.5 h-3.5 ${star <= (sk.level || 3) ? "fill-current text-[#F59E0B]" : "text-[#CBD5E1]"}`} />
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Inline Editable Years of Experience */}
+                        <div className="flex items-center gap-1 font-mono-code">
+                          <input
+                            type="number"
+                            min="0"
+                            max="40"
+                            step="0.5"
+                            value={sk.yearsExp ?? 0}
+                            onChange={(e) => handleUpdateSkill(sk.id, { yearsExp: parseFloat(e.target.value) || 0 })}
+                            className="w-12 px-1 py-0.5 text-center font-bold text-[#0F172A] bg-white border border-[#CBD5E1] rounded focus:outline-none focus:border-[#0891B2] text-[11px]"
+                            title="Edit Years of Experience"
+                          />
+                          <span className="text-[10px] text-[#64748B]">yrs exp</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteSkill(sk.id)}
+                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-white transition-colors cursor-pointer shrink-0 ml-1"
+                      title="Remove Skill"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: SKILL DIAGNOSTIC & TOP 3 ROLES */}
       {activeTab === "mirror" && (
         <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 space-y-6">
           <div>
             <h2 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
               <Activity className="w-5 h-5 text-[#0891B2]" />
-              Skill Diagnostic & Verification
+              Skill Diagnostic & Role Match Telemetry
             </h2>
             <p className="text-xs text-[#64748B] mt-1">
-              Real-time skill scores calculated from your work history and portfolio links.
+              Top 3 career role matches analyzed directly from your verified skills memory and portfolio evidence.
             </p>
           </div>
 
           <div className="space-y-4">
-            {capabilities.map((cap, i) => (
-              <div key={i} className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h3 className="font-bold text-sm text-[#0F172A]">{cap.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono-code font-bold text-[#0891B2]">
-                      Role Readiness: {cap.capability_score || 80}%
-                    </span>
+            {top3Roles.map((role: RoleMatchItem) => (
+              <div
+                key={role.rank}
+                className={`p-5 border rounded-xl transition-all space-y-4 ${
+                  role.isPrimary
+                    ? "bg-[#0891B2]/5 border-[#0891B2]/40 shadow-xs"
+                    : "bg-[#F8FAFC] border-[#E2E8F0]"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono-code font-bold text-xs ${
+                      role.isPrimary ? "bg-[#0891B2] text-white" : "bg-[#64748B] text-white"
+                    }`}>
+                      #{role.rank}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-[#0F172A]">{role.title}</h3>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono-code font-bold border ${role.badgeStyle}`}>
+                          {role.badge}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        <span className="text-[11px] text-[#64748B] font-mono-code">Matched Skills:</span>
+                        {(role.matchingSkills || []).map((sk: string, idx: number) => (
+                          <span key={idx} className="px-1.5 py-0.5 rounded bg-white border border-[#CBD5E1] text-[#0F172A] text-[10px] font-mono-code">
+                            {sk}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-2xl font-black text-[#0891B2] font-mono-code">{role.score}%</div>
+                    <div className="text-[10px] font-mono-code font-bold text-[#64748B] uppercase">Role Readiness</div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-[#E2E8F0] text-xs">
+                <div className="grid grid-cols-3 sm:grid-cols-3 gap-4 pt-3 border-t border-[#E2E8F0] text-xs">
                   <div>
-                    <div className="text-[11px] text-[#64748B] font-mono-code">Verification</div>
-                    <div className="font-bold text-[#0F172A] mt-0.5">{cap.verification_score || 85}%</div>
+                    <div className="text-[11px] text-[#64748B] font-mono-code">Skill Alignment</div>
+                    <div className="font-bold text-[#0F172A] mt-0.5">{role.verificationScore}%</div>
                   </div>
                   <div>
                     <div className="text-[11px] text-[#64748B] font-mono-code">Depth Score</div>
-                    <div className="font-bold text-[#0F172A] mt-0.5">{cap.depth_score || 75}%</div>
+                    <div className="font-bold text-[#0F172A] mt-0.5">{role.depthScore}%</div>
                   </div>
                   <div>
                     <div className="text-[11px] text-[#64748B] font-mono-code">Freshness</div>
-                    <div className="font-bold text-[#0F172A] mt-0.5">{cap.freshness_score || 90}%</div>
-                  </div>
-                  <div>
-                    <div className="text-[11px] text-[#64748B] font-mono-code">Verified Proofs</div>
-                    <div className="font-bold text-[#0891B2] mt-0.5">
-                      {cap.supported_by_evidence_ids?.length || 2} Links
-                    </div>
+                    <div className="font-bold text-[#0F172A] mt-0.5">{role.freshnessScore}%</div>
                   </div>
                 </div>
               </div>
@@ -705,31 +1322,162 @@ function ProfileContent() {
               External Account Integrations
             </h2>
             <p className="text-xs text-[#64748B] mt-1">
-              Connect external accounts to automatically extract portfolio evidence and market matches.
+              Connect external OAuth accounts to automatically extract portfolio evidence, sync calendar, and match jobs.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="font-bold text-xs text-[#0F172A]">GitHub Account</div>
-                <div className="text-[11px] text-[#64748B]">Extract commit graphs and repository links</div>
-              </div>
-              <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold">
-                CONNECTED
-              </span>
-            </div>
+            {/* GitHub Profile & Account Card */}
+            {(() => {
+              const hasGithubAccount = Boolean(profile?.github_id || profile?.github_url);
+              const displayUrl = profile?.github_url || "";
 
-            <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="font-bold text-xs text-[#0F172A]">Google OAuth</div>
-                <div className="text-[11px] text-[#64748B]">Calendar & single sign-on synchronization</div>
-              </div>
-              <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold">
-                ACTIVE
-              </span>
-            </div>
+              return (
+                <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex flex-col justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-[#0F172A]">GitHub Profile & Account</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGithubInput(profile?.github_url || "https://github.com/");
+                            setIsEditingGithubUrl(!isEditingGithubUrl);
+                          }}
+                          className="p-1 text-[#64748B] hover:text-[#0891B2] transition-colors cursor-pointer"
+                          title="Edit GitHub Profile URL"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] text-[#64748B]">Automated GraphQL scan of commit graphs and repositories</div>
+
+                      {isEditingGithubUrl ? (
+                        <form onSubmit={handleSaveGithubUrl} className="flex items-center gap-2 pt-2">
+                          <input
+                            type="url"
+                            value={githubInput}
+                            onChange={(e) => setGithubInput(e.target.value)}
+                            placeholder="https://github.com/username/"
+                            className="w-full px-2 py-1 border border-[#CBD5E1] rounded text-xs font-mono-code bg-white text-[#0F172A] focus:outline-none focus:border-[#0891B2]"
+                            autoFocus
+                          />
+                          <button
+                            type="submit"
+                            disabled={isSavingGithub}
+                            className="px-2 py-1 bg-[#0891B2] hover:bg-[#06b6d4] text-white rounded text-xs font-semibold shrink-0 cursor-pointer"
+                          >
+                            {isSavingGithub ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
+                          </button>
+                        </form>
+                      ) : (
+                        hasGithubAccount && displayUrl && (
+                          <a
+                            href={displayUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-block text-[10px] font-mono-code text-[#0891B2] hover:underline font-semibold pt-1 truncate max-w-full block"
+                          >
+                            Connected: {displayUrl}
+                          </a>
+                        )
+                      )}
+                    </div>
+
+                    {hasGithubAccount ? (
+                      <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                        CONNECTED
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                        NOT CONNECTED
+                      </span>
+                    )}
+                  </div>
+
+                  {!hasGithubAccount && !isEditingGithubUrl && (
+                    <a
+                      href={`${API_ENDPOINTS.djangoApi}/auth/github/login`}
+                      className="w-full text-center py-2 px-3 bg-[#0891B2] hover:bg-[#06b6d4] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer block"
+                    >
+                      Connect GitHub Account (OAuth)
+                    </a>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Google OAuth Card */}
+            {(() => {
+              const hasGoogle = Boolean(profile?.google_id);
+
+              return (
+                <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex flex-col justify-between gap-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="font-bold text-sm text-[#0F172A]">Google OAuth</div>
+                      <div className="text-[11px] text-[#64748B]">Calendar & single sign-on synchronization</div>
+                      {hasGoogle && profile?.email && (
+                        <div className="text-[10px] font-mono-code text-[#10B981] font-semibold pt-1">
+                          Linked Account: {profile.email}
+                        </div>
+                      )}
+                    </div>
+                    {hasGoogle ? (
+                      <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                        ACTIVE
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                        NOT CONNECTED
+                      </span>
+                    )}
+                  </div>
+
+                  {!hasGoogle && (
+                    <a
+                      href={`${API_ENDPOINTS.djangoApi}/auth/google/login`}
+                      className="w-full text-center py-2 px-3 border border-[#CBD5E1] hover:border-[#0891B2] bg-white hover:bg-[#0891B2]/5 text-[#0F172A] rounded-lg text-xs font-semibold transition-colors block"
+                    >
+                      Connect Google Account
+                    </a>
+                  )}
+                </div>
+              );
+            })()}
           </div>
+
+          {/* Linked Repository Evidence Nodes */}
+          {(() => {
+            const githubNodes = evidenceNodes.filter((n) => (n.url || "").toLowerCase().includes("github.com"));
+            if (githubNodes.length === 0) return null;
+
+            return (
+              <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-xs text-[#0F172A] uppercase tracking-wider font-mono-code">
+                    Submitted Repository Evidence ({githubNodes.length})
+                  </h3>
+                  <span className="text-[11px] text-[#64748B]">Parsed by Decision Engine</span>
+                </div>
+
+                <div className="space-y-2">
+                  {githubNodes.map((node) => (
+                    <div key={node.id} className="p-3 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex items-center justify-between gap-3 text-xs">
+                      <div className="min-w-0 flex-1 truncate">
+                        <span className="font-bold text-[#0F172A] truncate block">{node.url}</span>
+                        <span className="text-[10px] text-[#64748B] font-mono-code">Node Type: {node.node_type || "github_repo"}</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-[#0891B2]/10 text-[#0891B2] text-[10px] font-mono-code font-semibold shrink-0">
+                        VERIFIED EVIDENCE
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -742,8 +1490,7 @@ function ProfileContent() {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col">
-      <Navbar />
+    <AppLayout>
       <Suspense fallback={
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center gap-3">
           <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
@@ -752,6 +1499,6 @@ export default function ProfilePage() {
       }>
         <ProfileContent />
       </Suspense>
-    </div>
+    </AppLayout>
   );
 }

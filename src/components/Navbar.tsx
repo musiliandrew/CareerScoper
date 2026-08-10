@@ -7,6 +7,7 @@ import {
   Target,
   Briefcase,
   Send,
+  Zap,
   Building2,
   Calendar,
   BookOpen,
@@ -17,6 +18,8 @@ import {
   X
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/api";
+import NotificationBell from "@/components/NotificationBell";
+import { clearAuthCache } from "@/hooks/useRequireAuth";
 
 interface UserProfile {
   username?: string;
@@ -35,21 +38,17 @@ export default function Navbar() {
 
   useEffect(() => {
     async function loadUser() {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-
       try {
         const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/profile/me/`, {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          credentials: "include", // Send HttpOnly cookie
         });
         if (res.ok) {
           const data = await res.json();
           setUser(data);
-        } else if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem("access_token");
+        } else {
           setUser(null);
         }
       } catch (err) {
@@ -60,9 +59,13 @@ export default function Navbar() {
     loadUser();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Failed to logout securely", err);
+    }
+    clearAuthCache();
     setUser(null);
     router.push("/login");
   };
@@ -75,57 +78,38 @@ export default function Navbar() {
     { name: "Mission", href: "/profile", icon: Target },
     { name: "Job Monitor", href: "/jobs", icon: Briefcase },
     { name: "Applications", href: "/applications", icon: Send },
+    { name: "Action Center", href: "/action-center", icon: Zap },
     { name: "Companies", href: "/companies", icon: Building2 },
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Learning", href: "/learning", icon: BookOpen },
   ];
 
   return (
-    <header className="w-full h-18 border-b border-[#E2E8F0] bg-white sticky top-0 z-50 shadow-xs">
-      <div className="max-w-[1280px] mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
+    <header className="w-full h-16 border-b border-[#E2E8F0] bg-white sticky top-0 z-40 shadow-xs">
+      <div className="w-full mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
         
-        {/* Brand Logo */}
-        <div className="flex items-center gap-6">
-          <Link href="/profile" className="flex items-center gap-2.5 group">
-            <svg className="w-8 h-8 transition-transform group-hover:scale-105" viewBox="0 0 32 32" fill="none">
+        {/* Left Section: Mobile Brand Logo / Page Title */}
+        <div className="flex items-center gap-3">
+          <Link href="/profile" className="lg:hidden flex items-center gap-2">
+            <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
               <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2" fill="none" />
-              <line x1="16" y1="6" x2="16" y2="26" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
-              <line x1="6" y1="16" x2="26" y2="16" stroke="#0891B2" strokeWidth="1.5" opacity="0.6" />
               <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
-              <circle cx="22" cy="10" r="1.5" fill="#F59E0B" opacity="0.8" />
-              <circle cx="10" cy="22" r="1.5" fill="#F59E0B" opacity="0.8" />
             </svg>
-            <span className="brand-title text-xl">
+            <span className="brand-title text-lg">
               Career<span className="cyan-text">Scope</span>
             </span>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1 pl-4 border-l border-[#E2E8F0]">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-                    isActive
-                      ? "bg-[#0891B2]/10 text-[#0891B2]"
-                      : "text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]"
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{link.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="hidden lg:flex items-center gap-2 text-xs font-mono-code text-[#64748B]">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+            <span className="font-bold text-[#0F172A]">CAREER DASHBOARD</span>
+          </div>
         </div>
 
-        {/* Right Section: User Profile & Actions */}
+        {/* Right Section: Notification Bell & User Account Profile */}
         <div className="flex items-center gap-3">
           
+          {user && <NotificationBell />}
 
           {/* User Dropdown or Auth Action Buttons */}
           {user ? (

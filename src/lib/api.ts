@@ -4,8 +4,9 @@
  */
 
 const getDjangoUrl = () => {
+  // If we are in the browser, route through the secure proxy to attach HttpOnly cookies
   if (typeof window !== "undefined") {
-    return "/api";
+    return "/api/proxy";
   }
   return process.env.NEXT_PUBLIC_DJANGO_API_URL || "https://careerscope-backend-786345663105.us-central1.run.app/api";
 };
@@ -26,12 +27,7 @@ export const API_ENDPOINTS = {
  * Generic API Fetch Helper with Authorization Header
  */
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
   const headers = new Headers(options.headers || {});
-  
-  if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
   
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
@@ -40,6 +36,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const res = await fetch(endpoint, {
     ...options,
     headers,
+    credentials: "include", // Ensures HttpOnly cookies are sent to the Next.js API route
   });
 
   return res;

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/AppLayout";
 import {
   Calendar,
   Search,
@@ -63,8 +64,15 @@ export default function EventsPage() {
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center gap-3">
-        <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
-        <span className="text-xs font-mono-code text-[#64748B]">Verifying access permissions...</span>
+        <div className="flex flex-col items-center gap-2 animate-pulse">
+          <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2.5" fill="none" />
+            <circle cx="16" cy="16" r="3" fill="#F59E0B" />
+          </svg>
+          <span className="text-lg font-bold text-[#0F172A] tracking-wide">
+            Career<span className="text-[#0891B2]">Scope</span>
+          </span>
+        </div>
       </div>
     );
   }
@@ -75,8 +83,7 @@ export default function EventsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col">
-      <Navbar />
+    <AppLayout>
 
       <main className="flex-1 max-w-[1280px] w-full mx-auto p-4 sm:p-8 space-y-6">
         
@@ -106,8 +113,16 @@ export default function EventsPage() {
 
         {/* Events Grid */}
         {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-[#0891B2] animate-spin" />
+          <div className="py-16 flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center gap-2 animate-pulse">
+              <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2.5" fill="none" />
+                <circle cx="16" cy="16" r="3" fill="#F59E0B" />
+              </svg>
+              <span className="text-lg font-bold text-[#0F172A] tracking-wide">
+                Career<span className="text-[#0891B2]">Scope</span>
+              </span>
+            </div>
             <span className="text-xs font-mono-code text-[#64748B]">Loading event calendar...</span>
           </div>
         ) : (
@@ -146,6 +161,6 @@ export default function EventsPage() {
         )}
 
       </main>
-    </div>
+    </AppLayout>
   );
 }

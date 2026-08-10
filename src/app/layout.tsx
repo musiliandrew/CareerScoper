@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CareerScope — Career Intelligence System",
+  title: "CareerScope",
   description: "Run your career with precision & data. CareerScope reads global job market signals continuously, scores your exact readiness against target roles, and delivers 30-day execution plans.",
 };
 

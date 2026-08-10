@@ -44,37 +44,18 @@ export default function LoginPage() {
     }
 
     try {
-      const usernameInput = email.includes("@") ? email.split("@")[0] : email;
-
-      let response = await fetch(`${API_ENDPOINTS.djangoApi}/auth/login/`, {
+      let response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: email, email, password }),
+        body: JSON.stringify({ username: email.trim(), email: email.trim(), password }),
       });
 
-      let data = await safeJsonParse(response);
+      let data = await response.json();
 
-      // Fallback: if user not found with full email string, try with username prefix
-      if (!response.ok && data.info === "User not found" && email.includes("@")) {
-        response = await fetch(`${API_ENDPOINTS.djangoApi}/auth/login/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username: usernameInput, email, password }),
-        });
-        data = await safeJsonParse(response);
-      }
-
-      if (!response.ok) {
-        throw new Error(data.detail || data.info || data.error || "Invalid credentials. Please try again.");
-      }
-
-      if (data.access) {
-        localStorage.setItem("access_token", data.access);
-        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+      if (!response.ok || !data.success) {
+        throw new Error(data.detail || data.info || (data.error && typeof data.error === "string" ? data.error : "Invalid credentials. Please try again."));
       }
 
       setSuccess(true);
