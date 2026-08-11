@@ -9,5 +9,9 @@
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
-  }
+  },
+  "routes": [
+    { "pattern": "careerscope.me", "custom_domain": true },
+    { "pattern": "www.careerscope.me", "custom_domain": true }
+  ]
 }
