@@ -120,6 +120,8 @@ export default function JobsPage() {
   const [bookmarkedIds, setBookmarkedIds] = useState<Record<string | number, boolean>>({});
   const [agentApplying, setAgentApplying] = useState<Record<string | number, boolean>>({});
   const [appliedStatus, setAppliedStatus] = useState<Record<string | number, boolean>>({});
+  const [syncingJob, setSyncingJob] = useState<Record<string | number, boolean>>({});
+  const [syncedStatus, setSyncedStatus] = useState<Record<string | number, string>>({});
 
   const [companyFilter, setCompanyFilter] = useState("");
 
@@ -159,6 +161,32 @@ export default function JobsPage() {
       setAppliedStatus((prev) => ({ ...prev, [jobId]: true }));
     } finally {
       setAgentApplying((prev) => ({ ...prev, [jobId]: false }));
+    }
+  };
+
+  const handleSyncToIntegrations = async (jobId: string | number, target = "all") => {
+    setSyncingJob((prev) => ({ ...prev, [jobId]: true }));
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/integrations/sync-job/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ job_id: jobId, target })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSyncedStatus((prev) => ({ ...prev, [jobId]: "Synced to Workspace" }));
+      } else {
+        const err = data.results?.notion?.error || data.results?.clickup?.error || data.error || "Please configure Notion/ClickUp in Profile Integrations first.";
+        alert(`Sync Notice: ${err}`);
+      }
+    } catch (e) {
+      alert("Failed to sync job to Notion/ClickUp workspace.");
+    } finally {
+      setSyncingJob((prev) => ({ ...prev, [jobId]: false }));
     }
   };
 
@@ -230,17 +258,18 @@ export default function JobsPage() {
 
     return matchesSearch && matchesWorkType && matchesHighMatch;
   }).sort((a, b) => {
-    const scoreA = a.jobMatch || a.job_match || 0;
-    const scoreB = b.jobMatch || b.job_match || 0;
-    
-    if (scoreB !== scoreA) {
-      return scoreB - scoreA;
-    }
-    
-    // Secondary sort: most recent first
     const dateA = new Date(a.posted_at || a.created_at || 0).getTime();
     const dateB = new Date(b.posted_at || b.created_at || 0).getTime();
-    return dateB - dateA;
+    
+    // Primary sort: most recent first
+    if (dateB !== dateA) {
+      return dateB - dateA;
+    }
+    
+    // Secondary sort: highest match score first
+    const scoreA = a.jobMatch || a.job_match || 0;
+    const scoreB = b.jobMatch || b.job_match || 0;
+    return scoreB - scoreA;
   });
 
   return (
@@ -554,34 +583,64 @@ export default function JobsPage() {
 
                   {/* Bottom Actions Row */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-[#F1F5F9]">
-                    <button
-                      onClick={() => handleAgentApply(job.id)}
-                      disabled={!!agentApplying[job.id] || !!appliedStatus[job.id]}
-                      className={`w-full sm:w-auto h-9 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer shadow-xs ${
-                        appliedStatus[job.id]
-                          ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
-                          : agentApplying[job.id]
-                          ? "bg-[#F3E8FF] border-[#E9D5FF] text-[#7C3AED]"
-                          : "bg-[#7C3AED] hover:bg-[#6D28D9] text-white border-[#7C3AED]"
-                      }`}
-                    >
-                      {agentApplying[job.id] ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Agent Dispatching...</span>
-                        </>
-                      ) : appliedStatus[job.id] ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-                          <span>Agent Applied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="w-3.5 h-3.5" />
-                          <span>Let Agent Apply</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => handleAgentApply(job.id)}
+                        disabled={!!agentApplying[job.id] || !!appliedStatus[job.id]}
+                        className={`w-full sm:w-auto h-9 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer shadow-xs ${
+                          appliedStatus[job.id]
+                            ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
+                            : agentApplying[job.id]
+                            ? "bg-[#F3E8FF] border-[#E9D5FF] text-[#7C3AED]"
+                            : "bg-[#7C3AED] hover:bg-[#6D28D9] text-white border-[#7C3AED]"
+                        }`}
+                      >
+                        {agentApplying[job.id] ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Agent Dispatching...</span>
+                          </>
+                        ) : appliedStatus[job.id] ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
+                            <span>Agent Applied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-3.5 h-3.5" />
+                            <span>Let Agent Apply</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleSyncToIntegrations(job.id, "all")}
+                        disabled={!!syncingJob[job.id]}
+                        className={`w-full sm:w-auto h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer shadow-xs ${
+                          syncedStatus[job.id]
+                            ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
+                            : "bg-[#F8FAFC] border-[#E2E8F0] hover:border-[#0891B2] text-[#475569] hover:text-[#0891B2]"
+                        }`}
+                        title="Sync job details directly into your connected Notion / ClickUp workspace"
+                      >
+                        {syncingJob[job.id] ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0891B2]" />
+                            <span>Syncing...</span>
+                          </>
+                        ) : syncedStatus[job.id] ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
+                            <span>Workspace Synced</span>
+                          </>
+                        ) : (
+                          <>
+                            <Briefcase className="w-3.5 h-3.5 text-[#0891B2]" />
+                            <span>Sync Workspace</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
 
                     <a
                       href={job.external_url || "#"}

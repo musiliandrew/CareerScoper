@@ -133,6 +133,99 @@ function ProfileContent() {
   const [githubInput, setGithubInput] = useState("");
   const [isSavingGithub, setIsSavingGithub] = useState(false);
 
+  // Notion & ClickUp integration states
+  const [notionToken, setNotionToken] = useState("");
+  const [notionDbId, setNotionDbId] = useState("");
+  const [isNotionModalOpen, setIsNotionModalOpen] = useState(false);
+  const [notionStatus, setNotionStatus] = useState<{ configured: boolean; database_id?: string; last_sync?: string }>({ configured: false });
+  const [isSavingNotion, setIsSavingNotion] = useState(false);
+  const [notionMsg, setNotionMsg] = useState("");
+
+  const [clickupToken, setClickupToken] = useState("");
+  const [clickupListId, setClickupListId] = useState("");
+  const [isClickupModalOpen, setIsClickupModalOpen] = useState(false);
+  const [clickupStatus, setClickupStatus] = useState<{ configured: boolean; list_id?: string; last_sync?: string }>({ configured: false });
+  const [isSavingClickup, setIsSavingClickup] = useState(false);
+  const [clickupMsg, setClickupMsg] = useState("");
+
+  useEffect(() => {
+    async function fetchIntegrations() {
+      try {
+        const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/integrations/status/`, {
+          credentials: "include"
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.integrations) {
+            setNotionStatus(data.integrations.notion);
+            setClickupStatus(data.integrations.clickup);
+            if (data.integrations.notion.database_id) {
+              setNotionDbId(data.integrations.notion.database_id);
+            }
+            if (data.integrations.clickup.list_id) {
+              setClickupListId(data.integrations.clickup.list_id);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching integration status", e);
+      }
+    }
+    fetchIntegrations();
+  }, []);
+
+  const handleSaveNotion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingNotion(true);
+    setNotionMsg("");
+    try {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/integrations/notion/config/`, {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notion_api_token: notionToken, notion_database_id: notionDbId })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNotionMsg(`✅ ${data.message}`);
+        setNotionStatus({ configured: true, database_id: notionDbId });
+        setTimeout(() => setIsNotionModalOpen(false), 1500);
+      } else {
+        setNotionMsg(`❌ ${data.error || "Failed to connect to Notion."}`);
+      }
+    } catch (err: any) {
+      setNotionMsg(`❌ Connection error: ${err.message}`);
+    } finally {
+      setIsSavingNotion(false);
+    }
+  };
+
+  const handleSaveClickup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingClickup(true);
+    setClickupMsg("");
+    try {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/integrations/clickup/config/`, {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clickup_api_token: clickupToken, clickup_list_id: clickupListId })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setClickupMsg(`✅ ${data.message}`);
+        setClickupStatus({ configured: true, list_id: clickupListId });
+        setTimeout(() => setIsClickupModalOpen(false), 1500);
+      } else {
+        setClickupMsg(`❌ ${data.error || "Failed to connect to ClickUp."}`);
+      }
+    } catch (err: any) {
+      setClickupMsg(`❌ Connection error: ${err.message}`);
+    } finally {
+      setIsSavingClickup(false);
+    }
+  };
+
   const handleSaveGithubUrl = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!githubInput.trim()) return;
@@ -1446,6 +1539,158 @@ function ProfileContent() {
                 </div>
               );
             })()}
+
+            {/* Notion Workspace Sync Card */}
+            <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex flex-col justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="font-bold text-sm text-[#0F172A] flex items-center gap-2">
+                    <span>Notion Database Sync</span>
+                  </div>
+                  <div className="text-[11px] text-[#64748B]">
+                    Automatically push high-match jobs directly to your custom Notion Job Application Database.
+                  </div>
+                  {notionStatus.configured && (
+                    <div className="text-[10px] font-mono-code text-[#0891B2] font-semibold pt-1 truncate">
+                      DB ID: {notionStatus.database_id || notionDbId}
+                    </div>
+                  )}
+                </div>
+
+                {notionStatus.configured ? (
+                  <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                    CONNECTED
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                    NOT CONFIGURED
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsNotionModalOpen(!isNotionModalOpen)}
+                className="w-full text-center py-2 px-3 bg-[#0F172A] hover:bg-[#1E293B] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer block"
+              >
+                {notionStatus.configured ? "Update Notion Settings" : "Connect Notion Database"}
+              </button>
+
+              {isNotionModalOpen && (
+                <form onSubmit={handleSaveNotion} className="pt-3 border-t border-[#E2E8F0] space-y-3">
+                  {notionMsg && (
+                    <div className="p-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium">
+                      {notionMsg}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#0F172A] mb-1">Notion Integration Token</label>
+                    <input
+                      type="password"
+                      placeholder="secret_..."
+                      value={notionToken}
+                      onChange={(e) => setNotionToken(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg text-xs font-mono-code bg-white text-[#0F172A]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#0F172A] mb-1">Notion Database ID</label>
+                    <input
+                      type="text"
+                      placeholder="32-character database id"
+                      value={notionDbId}
+                      onChange={(e) => setNotionDbId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg text-xs font-mono-code bg-white text-[#0F172A]"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSavingNotion}
+                    className="w-full py-1.5 bg-[#0891B2] hover:bg-[#06b6d4] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {isSavingNotion ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save & Verify Connection"}
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* ClickUp Task Sync Card */}
+            <div className="p-5 border border-[#E2E8F0] rounded-xl bg-[#F8FAFC] flex flex-col justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <div className="font-bold text-sm text-[#0F172A] flex items-center gap-2">
+                    <span>ClickUp List Sync</span>
+                  </div>
+                  <div className="text-[11px] text-[#64748B]">
+                    Create actionable tasks with AI match scores in your ClickUp recruitment board.
+                  </div>
+                  {clickupStatus.configured && (
+                    <div className="text-[10px] font-mono-code text-[#7C3AED] font-semibold pt-1 truncate">
+                      List ID: {clickupStatus.list_id || clickupListId}
+                    </div>
+                  )}
+                </div>
+
+                {clickupStatus.configured ? (
+                  <span className="px-2.5 py-1 bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                    CONNECTED
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-1 bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1] rounded-md text-[10px] font-mono-code font-bold shrink-0">
+                    NOT CONFIGURED
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsClickupModalOpen(!isClickupModalOpen)}
+                className="w-full text-center py-2 px-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer block"
+              >
+                {clickupStatus.configured ? "Update ClickUp Settings" : "Connect ClickUp List"}
+              </button>
+
+              {isClickupModalOpen && (
+                <form onSubmit={handleSaveClickup} className="pt-3 border-t border-[#E2E8F0] space-y-3">
+                  {clickupMsg && (
+                    <div className="p-2 bg-white border border-[#E2E8F0] rounded-lg text-xs font-medium">
+                      {clickupMsg}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#0F172A] mb-1">ClickUp Personal API Token</label>
+                    <input
+                      type="password"
+                      placeholder="pk_..."
+                      value={clickupToken}
+                      onChange={(e) => setClickupToken(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg text-xs font-mono-code bg-white text-[#0F172A]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-[#0F172A] mb-1">ClickUp List ID</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 901802948"
+                      value={clickupListId}
+                      onChange={(e) => setClickupListId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 border border-[#CBD5E1] rounded-lg text-xs font-mono-code bg-white text-[#0F172A]"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSavingClickup}
+                    className="w-full py-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {isSavingClickup ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Save & Verify Connection"}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
 
           {/* Linked Repository Evidence Nodes */}

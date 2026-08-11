@@ -27,9 +27,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
 
 async function handleProxy(req: NextRequest, pathArray: string[]) {
   const djangoApi = process.env.NEXT_PUBLIC_DJANGO_API_URL || "https://careerscope-backend-786345663105.us-central1.run.app/api";
-  const targetUrl = `${djangoApi}/${pathArray.join("/")}/` + req.nextUrl.search;
+  const rawPath = pathArray.join("/").replace(/\/+$/, "");
+  const targetUrl = `${djangoApi.replace(/\/+$/, "")}/${rawPath}/` + req.nextUrl.search;
 
   const accessToken = req.cookies.get("access_token")?.value;
+  const clientAuth = req.headers.get("authorization");
 
   const headers = new Headers();
   
@@ -41,6 +43,8 @@ async function handleProxy(req: NextRequest, pathArray: string[]) {
 
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
+  } else if (clientAuth) {
+    headers.set("Authorization", clientAuth);
   }
 
   let body = undefined;
