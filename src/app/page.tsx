@@ -350,7 +350,7 @@ export default function Home() {
                 <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg space-y-2">
                   <div className="font-bold text-[#0F172A]">Recruiter Cover Letter Output:</div>
                   <p className="text-[#475569] leading-relaxed">
-                    Subject: Application for Staff Backend Engineer — Andrew Musili<br/><br/>
+                    Subject: Application for Staff Backend Engineer — Your Name<br/><br/>
                     Dear Ramp Hiring Team,<br/>
                     I have followed Ramp's engineering milestones in high-throughput payment architectures. My background building distributed microservices on GCP Cloud Run with FastAPI directly addresses your current scalability roadmap...
                   </p>
