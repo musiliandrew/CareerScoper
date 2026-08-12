@@ -358,12 +358,11 @@ export default function JobsPage() {
     return scoreB - scoreA;
   });
 
-  return (
-    <AppLayout>
-
-      <main className="flex-1 max-w-[1280px] w-full mx-auto p-4 sm:p-8 space-y-6">
-        
-        {/* Header */}
+  const mainContent = (
+    <main className="flex-1 max-w-[1280px] w-full mx-auto p-4 sm:p-8 space-y-6">
+      
+      {/* Member Header (Only rendered inside internal member dashboard) */}
+      {isAuthenticated && (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-xs">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 font-mono-code text-[11px] font-semibold text-[#0891B2]">
@@ -372,9 +371,7 @@ export default function JobsPage() {
             </div>
             <h1 className="text-2xl font-bold text-[#0F172A]">Job Radar & Market Monitor</h1>
             <p className="text-xs text-[#64748B]">
-              {isAuthenticated
-                ? "Real-time tech job opportunities matched against your verified skills graph."
-                : "Browse real-time tech job opportunities across remote, hybrid, and tech hubs worldwide."}
+              Real-time tech job opportunities matched against your verified skills graph.
             </p>
           </div>
 
@@ -384,6 +381,7 @@ export default function JobsPage() {
             </span>
           </div>
         </div>
+      )}
 
         {/* Search & Filter Bar */}
         <div className="bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-xs space-y-4">
@@ -699,62 +697,66 @@ export default function JobsPage() {
                   {/* Bottom Actions Row */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-[#F1F5F9]">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <button
-                        onClick={() => handleAgentApply(job.id)}
-                        disabled={!!agentApplying[job.id] || !!appliedStatus[job.id]}
-                        className={`w-full sm:w-auto h-9 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer shadow-xs ${
-                          appliedStatus[job.id]
-                            ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
-                            : agentApplying[job.id]
-                            ? "bg-[#F3E8FF] border-[#E9D5FF] text-[#7C3AED]"
-                            : "bg-[#7C3AED] hover:bg-[#6D28D9] text-white border-[#7C3AED]"
-                        }`}
-                      >
-                        {agentApplying[job.id] ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Agent Dispatching...</span>
-                          </>
-                        ) : appliedStatus[job.id] ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-                            <span>Agent Applied!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Wand2 className="w-3.5 h-3.5" />
-                            <span>Let Agent Apply</span>
-                          </>
-                        )}
-                      </button>
+                      {isAuthenticated && (
+                        <>
+                          <button
+                            onClick={() => handleAgentApply(job.id)}
+                            disabled={!!agentApplying[job.id] || !!appliedStatus[job.id]}
+                            className={`w-full sm:w-auto h-9 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer shadow-xs ${
+                              appliedStatus[job.id]
+                                ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
+                                : agentApplying[job.id]
+                                ? "bg-[#F3E8FF] border-[#E9D5FF] text-[#7C3AED]"
+                                : "bg-[#7C3AED] hover:bg-[#6D28D9] text-white border-[#7C3AED]"
+                            }`}
+                          >
+                            {agentApplying[job.id] ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                <span>Agent Dispatching...</span>
+                              </>
+                            ) : appliedStatus[job.id] ? (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
+                                <span>Agent Applied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-3.5 h-3.5" />
+                                <span>Let Agent Apply</span>
+                              </>
+                            )}
+                          </button>
 
-                      <button
-                        onClick={() => handleSyncToIntegrations(job.id, "all")}
-                        disabled={!!syncingJob[job.id]}
-                        className={`w-full sm:w-auto h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer shadow-xs ${
-                          syncedStatus[job.id]
-                            ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
-                            : "bg-[#F8FAFC] border-[#E2E8F0] hover:border-[#0891B2] text-[#475569] hover:text-[#0891B2]"
-                        }`}
-                        title="Sync job details directly into your connected Notion / ClickUp workspace"
-                      >
-                        {syncingJob[job.id] ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0891B2]" />
-                            <span>Syncing...</span>
-                          </>
-                        ) : syncedStatus[job.id] ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-                            <span>Workspace Synced</span>
-                          </>
-                        ) : (
-                          <>
-                            <Briefcase className="w-3.5 h-3.5 text-[#0891B2]" />
-                            <span>Sync Workspace</span>
-                          </>
-                        )}
-                      </button>
+                          <button
+                            onClick={() => handleSyncToIntegrations(job.id, "all")}
+                            disabled={!!syncingJob[job.id]}
+                            className={`w-full sm:w-auto h-9 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer shadow-xs ${
+                              syncedStatus[job.id]
+                                ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]"
+                                : "bg-[#F8FAFC] border-[#E2E8F0] hover:border-[#0891B2] text-[#475569] hover:text-[#0891B2]"
+                            }`}
+                            title="Sync job details directly into your connected Notion / ClickUp workspace"
+                          >
+                            {syncingJob[job.id] ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0891B2]" />
+                                <span>Syncing...</span>
+                              </>
+                            ) : syncedStatus[job.id] ? (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
+                                <span>Workspace Synced</span>
+                              </>
+                            ) : (
+                              <>
+                                <Briefcase className="w-3.5 h-3.5 text-[#0891B2]" />
+                                <span>Sync Workspace</span>
+                              </>
+                            )}
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -775,12 +777,12 @@ export default function JobsPage() {
                             setApplyModalJob(job);
                           }
                         }}
-                        className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                       >
                         {!isAuthenticated ? (
                           <>
                             <Lock className="w-3.5 h-3.5 text-[#F59E0B]" />
-                            <span>Unlock Link</span>
+                            <span>Unlock Direct Link</span>
                           </>
                         ) : (
                           <>
@@ -1091,7 +1093,52 @@ export default function JobsPage() {
           </div>
         )}
 
-      </main>
-    </AppLayout>
+    </main>
   );
+
+  if (!isAuthenticated && !authLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
+        <Navbar />
+
+        {/* Public Header Hero Banner */}
+        <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
+          <div className="max-w-[1280px] mx-auto space-y-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 font-mono-code text-[11px] font-bold text-[#0891B2]">
+                <Globe className="w-3.5 h-3.5" />
+                <span>PUBLIC CAREERSCOPE DIRECTORY</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
+                Curated Tech Opportunities
+              </h1>
+              <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
+                Explore live tech job listings aggregated across top engineering organizations. Sign up for a free account to unlock direct application URLs and 1-click AI Agent applications.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0">
+              <Link
+                href="/signup?redirect=/jobs"
+                className="w-full sm:w-auto px-5 py-2.5 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors"
+              >
+                <span>Create Free Profile</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link
+                href="/login?redirect=/jobs"
+                className="w-full sm:w-auto px-4 py-2.5 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] rounded-xl text-xs font-bold text-center transition-colors"
+              >
+                Sign In
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {mainContent}
+      </div>
+    );
+  }
+
+  return <AppLayout>{mainContent}</AppLayout>;
 }
