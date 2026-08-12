@@ -805,28 +805,30 @@ export default function JobsPage() {
                         <span>Share</span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            setUnauthModalOpen(true);
-                          } else {
-                            setApplyModalJob(job);
-                          }
-                        }}
-                        className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-                      >
-                        {!isAuthenticated ? (
-                          <>
-                            <Lock className="w-3.5 h-3.5 text-[#F59E0B]" />
-                            <span>Unlock Direct Link</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </button>
+                      {!isAuthenticated ? (
+                        <div
+                          onClick={() => setUnauthModalOpen(true)}
+                          className="group/blur border border-[#0891B2]/30 bg-[#F8FAFC] hover:bg-[#F0FDFA] hover:border-[#0891B2] p-1.5 px-3 rounded-xl cursor-pointer transition-all flex items-center gap-2 select-none shadow-xs"
+                          title="Click to sign in or create an account to reveal application link"
+                        >
+                          <Lock className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+                          <span className="text-[11px] font-mono-code text-[#475569] blur-[4px] group-hover/blur:blur-[2px] transition-all overflow-hidden text-ellipsis whitespace-nowrap max-w-[160px] sm:max-w-[220px]">
+                            {job.external_url || `https://careers.${(company || 'company').toLowerCase().replace(/[^a-z0-9]/g, '')}.com/apply/v2/${job.id}`}
+                          </span>
+                          <span className="text-[10px] font-bold text-[#0891B2] bg-[#0891B2]/10 px-2 py-0.5 rounded-md shrink-0 ml-auto flex items-center gap-1">
+                            <span>Sign up to reveal</span>
+                            <ExternalLink className="w-3 h-3 text-[#0891B2]" />
+                          </span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setApplyModalJob(job)}
+                          className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                        >
+                          <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
