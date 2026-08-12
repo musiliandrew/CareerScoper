@@ -344,6 +344,10 @@ export default function JobsPage() {
 
     return matchesSearch && matchesWorkType && matchesHighMatch;
   }).sort((a, b) => {
+    if (sharedJobId) {
+      if (String(a.id) === String(sharedJobId)) return -1;
+      if (String(b.id) === String(sharedJobId)) return 1;
+    }
     const dateA = new Date(a.posted_at || a.created_at || 0).getTime();
     const dateB = new Date(b.posted_at || b.created_at || 0).getTime();
     
@@ -505,6 +509,27 @@ export default function JobsPage() {
           </div>
         )}
 
+        {/* Shared Job Highlight Banner */}
+        {sharedJobId && (
+          <div className="flex items-center justify-between bg-[#0891B2]/10 border border-[#0891B2]/40 p-4 rounded-2xl shadow-xs">
+            <div className="flex items-center gap-3 text-xs font-mono-code text-[#0891B2]">
+              <Sparkles className="w-4 h-4 text-[#0891B2] shrink-0" />
+              <span>Viewing shared job opportunity link: <strong className="text-[#0F172A] font-bold font-sans">ID #{sharedJobId}</strong></span>
+            </div>
+            <button
+              onClick={() => {
+                setSharedJobId(null);
+                if (typeof window !== "undefined") {
+                  window.history.replaceState({}, "", "/jobs");
+                }
+              }}
+              className="px-3 py-1 bg-white border border-[#E2E8F0] rounded-xl text-xs font-bold text-[#475569] hover:text-[#EF4444] cursor-pointer transition-colors shadow-xs"
+            >
+              View All Jobs ✕
+            </button>
+          </div>
+        )}
+
         {/* Job Listings Grid */}
         {loading ? (
           <div className="py-16 flex flex-col items-center justify-center gap-4">
@@ -540,16 +565,27 @@ export default function JobsPage() {
               const match = job.jobMatch || job.job_match || 80;
               const isBookmarked = !!bookmarkedIds[job.id];
               const company = job.company_name || job.company || "Leading Tech Corp";
-              const location = job.location_text || "Remote";
+              const locationText = job.location_text || "Remote";
+              const isSharedTarget = sharedJobId && String(job.id) === String(sharedJobId);
 
               return (
                 <div
                   key={job.id}
-                  className="bg-white border border-[#E2E8F0] hover:border-[#0891B2]/50 p-6 rounded-2xl shadow-xs transition-all flex flex-col space-y-4 group hover:shadow-md"
+                  className={`bg-white p-6 rounded-2xl shadow-xs transition-all flex flex-col space-y-4 group hover:shadow-md ${
+                    isSharedTarget
+                      ? "border-2 border-[#0891B2] shadow-md bg-[#F0FDFA]/30"
+                      : "border border-[#E2E8F0] hover:border-[#0891B2]/50"
+                  }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="space-y-3 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
+                        {isSharedTarget && (
+                          <span className="px-2.5 py-1 bg-[#0891B2] text-white rounded-lg text-xs font-mono-code font-bold flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-white" /> Shared Opportunity
+                          </span>
+                        )}
+
                         {isAuthenticated ? (
                           <span className="px-2.5 py-1 bg-[#0891B2]/10 border border-[#0891B2]/20 text-[#0891B2] rounded-lg text-xs font-mono-code font-bold">
                             {match}% Match
@@ -598,7 +634,7 @@ export default function JobsPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <MapPin className="w-3.5 h-3.5 text-[#0891B2]" />
-                            {location}
+                            {locationText}
                           </span>
                           {job.salary_formatted && (
                             <span className="flex items-center gap-1">
