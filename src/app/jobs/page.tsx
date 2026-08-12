@@ -808,16 +808,15 @@ export default function JobsPage() {
                       {!isAuthenticated ? (
                         <div
                           onClick={() => setUnauthModalOpen(true)}
-                          className="group/blur border border-[#0891B2]/30 bg-[#F8FAFC] hover:bg-[#F0FDFA] hover:border-[#0891B2] p-1.5 px-3 rounded-xl cursor-pointer transition-all flex items-center gap-2 select-none shadow-xs"
-                          title="Click to sign in or create an account to reveal application link"
+                          className="group/blur border border-[#0891B2]/30 bg-[#F8FAFC] hover:bg-[#F0FDFA] hover:border-[#0891B2] h-9 px-3 rounded-xl cursor-pointer transition-all flex items-center gap-2 select-none shadow-xs"
+                          title="Click to sign up"
                         >
                           <Lock className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
-                          <span className="text-[11px] font-mono-code text-[#475569] blur-[4px] group-hover/blur:blur-[2px] transition-all overflow-hidden text-ellipsis whitespace-nowrap max-w-[160px] sm:max-w-[220px]">
-                            {job.external_url || `https://careers.${(company || 'company').toLowerCase().replace(/[^a-z0-9]/g, '')}.com/apply/v2/${job.id}`}
+                          <span className="text-[11px] font-mono-code text-[#475569] blur-[4px] group-hover/blur:blur-[2px] transition-all overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px] sm:max-w-[180px]">
+                            {job.external_url || `https://careers.company.com/apply/${job.id}`}
                           </span>
-                          <span className="text-[10px] font-bold text-[#0891B2] bg-[#0891B2]/10 px-2 py-0.5 rounded-md shrink-0 ml-auto flex items-center gap-1">
-                            <span>Sign up to reveal</span>
-                            <ExternalLink className="w-3 h-3 text-[#0891B2]" />
+                          <span className="text-xs font-bold text-white bg-[#0891B2] hover:bg-[#0891B2]/90 px-3 py-1 rounded-lg shrink-0 ml-auto transition-colors">
+                            Sign Up
                           </span>
                         </div>
                       ) : (
