@@ -69,10 +69,6 @@ export default function Home() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#475569]">
-            <Link href="/jobs" className="hover:text-[#0891B2] transition-colors font-bold text-[#0891B2] flex items-center gap-1.5">
-              <Briefcase className="w-4 h-4 text-[#0891B2]" />
-              <span>Job Radar</span>
-            </Link>
             <a href="#how-it-works" className="hover:text-[#0891B2] transition-colors">How it works</a>
             <a href="#market" className="hover:text-[#0891B2] transition-colors">Market Data</a>
             <a href="#roadmap" className="hover:text-[#0891B2] transition-colors">Growth Roadmap</a>
