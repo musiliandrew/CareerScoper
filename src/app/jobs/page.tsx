@@ -322,7 +322,48 @@ export default function JobsPage() {
     setHighMatchOnly(false);
   };
 
+  const NON_JOB_TITLES = [
+    "read our faq",
+    "faq",
+    "faqs",
+    "frequently asked questions",
+    "company overview",
+    "about our company",
+    "about us",
+    "what we do",
+    "hiring process",
+    "how we hire",
+    "people",
+    "our team",
+    "accommodation",
+    "accessibility",
+    "legal",
+    "privacy policy",
+    "terms of service",
+    "terms and conditions",
+    "contact us",
+    "contact",
+    "get in touch",
+    "jobs",
+    "roles",
+    "perks",
+    "benefits",
+    "overview",
+    "home"
+  ];
+
   const filteredJobs = jobs.filter((job) => {
+    const titleLower = (job.title || "").trim().toLowerCase();
+    const isJunkTitle =
+      NON_JOB_TITLES.includes(titleLower) ||
+      titleLower.startsWith("read our") ||
+      titleLower.startsWith("about our") ||
+      titleLower.startsWith("contact us") ||
+      titleLower.startsWith("privacy policy") ||
+      titleLower.startsWith("terms of");
+
+    if (isJunkTitle) return false;
+
     const s = search.trim().toLowerCase();
     const titleMatch = (job.title || "").toLowerCase().includes(s);
     const companyMatch = (job.company_name || job.company || "").toLowerCase().includes(s);
