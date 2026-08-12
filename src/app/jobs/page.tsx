@@ -21,7 +21,8 @@ import {
   Wand2,
   AlertTriangle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/api";
 
@@ -122,12 +123,56 @@ export default function JobsPage() {
   const [appliedStatus, setAppliedStatus] = useState<Record<string | number, boolean>>({});
   const [syncingJob, setSyncingJob] = useState<Record<string | number, boolean>>({});
   const [syncedStatus, setSyncedStatus] = useState<Record<string | number, string>>({});
+  const [applyModalJob, setApplyModalJob] = useState<Job | null>(null);
+  const [recordApplication, setRecordApplication] = useState(true);
 
   const [companyFilter, setCompanyFilter] = useState("");
 
   const [page, setPage] = useState(1);
   const [totalJobsCount, setTotalJobsCount] = useState(0);
   const pageSize = 15;
+
+  const handleConfirmApply = async (shouldRecord: boolean) => {
+    if (!applyModalJob) return;
+
+    const job = applyModalJob;
+    const externalUrl = job.external_url || "#";
+
+    if (externalUrl && externalUrl !== "#") {
+      window.open(externalUrl, "_blank", "noopener,noreferrer");
+    }
+
+    if (shouldRecord) {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (token) {
+          await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              company_name: job.company_name || job.company || "Unknown Company",
+              job_title: job.title,
+              status: "applied",
+              applied_date: new Date().toISOString().split("T")[0],
+              application_url: externalUrl,
+              source: job.source_name || "Job Radar",
+              location: job.location_text || "",
+              work_type: job.work_type || "remote",
+              notes: `Recorded via Job Radar on ${new Date().toLocaleDateString()}`
+            })
+          });
+        }
+        setAppliedStatus((prev) => ({ ...prev, [job.id]: true }));
+      } catch (err) {
+        console.error("Failed to record application:", err);
+      }
+    }
+
+    setApplyModalJob(null);
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -642,15 +687,13 @@ export default function JobsPage() {
                       </button>
                     </div>
 
-                    <a
-                      href={job.external_url || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2"
+                    <button
+                      onClick={() => setApplyModalJob(job)}
+                      className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <span>Apply Now</span>
+                      <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
                       <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                    </button>
                   </div>
                 </div>
               );
@@ -704,6 +747,77 @@ export default function JobsPage() {
                 <span>Next</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Apply Confirmation Modal Popup */}
+        {applyModalJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
+              <button
+                onClick={() => setApplyModalJob(null)}
+                className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F172A] p-1 rounded-lg hover:bg-[#F1F5F9] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-[#0891B2]/10 border border-[#0891B2]/20 rounded-xl text-[#0891B2]">
+                  <Briefcase className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono-code font-bold text-[#0891B2] uppercase tracking-wider">
+                    Application Telemetry
+                  </span>
+                  <h2 className="text-base font-bold text-[#0F172A]">Confirm Job Application</h2>
+                </div>
+              </div>
+
+              <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-1">
+                <h3 className="text-sm font-bold text-[#0F172A]">{applyModalJob.title}</h3>
+                <p className="text-xs text-[#64748B] font-medium">
+                  {applyModalJob.company_name || applyModalJob.company} • {applyModalJob.location_text || "Remote"}
+                </p>
+              </div>
+
+              <p className="text-xs text-[#475569] leading-relaxed">
+                Do you want to record this application in your <strong>Applications Dashboard</strong> to track status, interviews, and AI insights?
+              </p>
+
+              <label className="flex items-start gap-3 p-3.5 bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl cursor-pointer hover:bg-[#D1FAE5] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={recordApplication}
+                  onChange={(e) => setRecordApplication(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-[#059669] border-[#A7F3D0] rounded focus:ring-[#059669]"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-[#065F46] block">
+                    Record in Applications Tracker
+                  </span>
+                  <span className="text-[11px] text-[#047857] block">
+                    Logs this role in your active Applications tracker so you can monitor progress.
+                  </span>
+                </div>
+              </label>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#F1F5F9]">
+                <button
+                  onClick={() => setApplyModalJob(null)}
+                  className="px-4 py-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => handleConfirmApply(recordApplication)}
+                  className="px-4 py-2 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <span>{recordApplication ? "Apply & Record" : "Just Open Link"}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         )}
