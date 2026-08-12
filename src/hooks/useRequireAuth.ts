@@ -14,7 +14,7 @@ let cachedUser: any | null = null;
 let hasVerifiedSession = false;
 let verifyPromise: Promise<any> | null = null;
 
-export function useRequireAuth(): AuthState {
+export function useRequireAuth(redirectToLogin: boolean = true): AuthState {
   const router = useRouter();
   const [authState, setAuthState] = useState<AuthState>(() => {
     return {
@@ -30,7 +30,7 @@ export function useRequireAuth(): AuthState {
       if (authState.isLoading) {
         setAuthState({ isAuthenticated: cachedUser !== null, isLoading: false, user: cachedUser });
       }
-      if (cachedUser === null) {
+      if (cachedUser === null && redirectToLogin) {
         router.replace("/login");
       }
       return;
@@ -60,13 +60,15 @@ export function useRequireAuth(): AuthState {
           setAuthState({ isAuthenticated: true, isLoading: false, user: userData });
         }
       } catch (err) {
-        console.warn("Auth verification failed - clearing session and redirecting.");
+        console.warn("Auth verification status: unauthenticated");
         cachedUser = null;
         hasVerifiedSession = true;
         verifyPromise = null;
         if (isMounted) {
           setAuthState({ isAuthenticated: false, isLoading: false, user: null });
-          router.replace("/login");
+          if (redirectToLogin) {
+            router.replace("/login");
+          }
         }
       }
     }
@@ -76,7 +78,7 @@ export function useRequireAuth(): AuthState {
     return () => {
       isMounted = false;
     };
-  }, [router, authState.isLoading]);
+  }, [router, authState.isLoading, redirectToLogin]);
 
   return authState;
 }

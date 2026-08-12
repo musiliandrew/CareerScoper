@@ -27,8 +27,11 @@ import {
   Copy,
   Check,
   Send,
-  Mail
+  Mail,
+  Lock,
+  ArrowRight
 } from "lucide-react";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/lib/api";
 
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -117,7 +120,7 @@ function getJobSkills(job: Job): string[] {
 }
 
 export default function JobsPage() {
-  const { isAuthenticated, isLoading: authLoading } = useRequireAuth();
+  const { isAuthenticated, isLoading: authLoading } = useRequireAuth(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -134,6 +137,8 @@ export default function JobsPage() {
   const [shareModalJob, setShareModalJob] = useState<Job | null>(null);
   const [sharedJobId, setSharedJobId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const [unauthModalOpen, setUnauthModalOpen] = useState(false);
 
   const [companyFilter, setCompanyFilter] = useState("");
 
@@ -213,6 +218,10 @@ export default function JobsPage() {
 
 
   const handleAgentApply = async (jobId: string | number) => {
+    if (!isAuthenticated) {
+      setUnauthModalOpen(true);
+      return;
+    }
     setAgentApplying((prev) => ({ ...prev, [jobId]: true }));
     try {
       const token = localStorage.getItem("access_token");
@@ -238,6 +247,10 @@ export default function JobsPage() {
   };
 
   const handleSyncToIntegrations = async (jobId: string | number, target = "all") => {
+    if (!isAuthenticated) {
+      setUnauthModalOpen(true);
+      return;
+    }
     setSyncingJob((prev) => ({ ...prev, [jobId]: true }));
     try {
       const token = localStorage.getItem("access_token");
@@ -736,11 +749,26 @@ export default function JobsPage() {
                       </button>
 
                       <button
-                        onClick={() => setApplyModalJob(job)}
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            setUnauthModalOpen(true);
+                          } else {
+                            setApplyModalJob(job);
+                          }
+                        }}
                         className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        {!isAuthenticated ? (
+                          <>
+                            <Lock className="w-3.5 h-3.5 text-[#F59E0B]" />
+                            <span>Unlock Link</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -978,6 +1006,67 @@ export default function JobsPage() {
                     <span>Email</span>
                   </a>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Unauthenticated Feature Lock Modal */}
+        {unauthModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
+              <button
+                onClick={() => setUnauthModalOpen(false)}
+                className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F172A] p-1 rounded-lg hover:bg-[#F1F5F9] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl text-[#D97706]">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono-code font-bold text-[#0891B2] uppercase tracking-wider">
+                    CareerScope PLG Access
+                  </span>
+                  <h2 className="text-base font-bold text-[#0F172A]">Unlock Direct Application URLs</h2>
+                </div>
+              </div>
+
+              <p className="text-xs text-[#475569] leading-relaxed">
+                Direct external application links and 1-click autonomous AI Agent dispatches are exclusively available to registered <strong>CareerScope</strong> members.
+              </p>
+
+              <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-2 text-xs text-[#334155]">
+                <div className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+                  <span>Instant access to verified direct application links</span>
+                </div>
+                <div className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+                  <span>1-Click AI Agent matching & autonomous dispatch</span>
+                </div>
+                <div className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+                  <span>Real-time application telemetry & status tracking</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#F1F5F9]">
+                <Link
+                  href="/login?redirect=/jobs"
+                  className="w-full sm:w-auto px-4 py-2.5 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] rounded-xl text-xs font-semibold text-center cursor-pointer transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup?redirect=/jobs"
+                  className="w-full sm:w-1/2 px-4 py-2.5 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors"
+                >
+                  <span>Create Free Account</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
           </div>

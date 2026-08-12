@@ -30,7 +30,8 @@ import {
   Brain,
   FileCode2,
   Workflow,
-  Sparkle
+  Sparkle,
+  Briefcase
 } from "lucide-react";
 
 export default function Home() {
@@ -68,6 +69,10 @@ export default function Home() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#475569]">
+            <Link href="/jobs" className="hover:text-[#0891B2] transition-colors font-bold text-[#0891B2] flex items-center gap-1.5">
+              <Briefcase className="w-4 h-4 text-[#0891B2]" />
+              <span>Job Radar</span>
+            </Link>
             <a href="#how-it-works" className="hover:text-[#0891B2] transition-colors">How it works</a>
             <a href="#market" className="hover:text-[#0891B2] transition-colors">Market Data</a>
             <a href="#roadmap" className="hover:text-[#0891B2] transition-colors">Growth Roadmap</a>
@@ -76,6 +81,13 @@ export default function Home() {
 
           {/* Action CTAs */}
           <div className="flex items-center gap-3">
+            <Link
+              href="/jobs"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[#0891B2] hover:bg-[#0891B2]/10 border border-[#0891B2]/30 px-3 py-1.5 rounded-xl transition-colors"
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Explore Live Jobs</span>
+            </Link>
             <Link
               href="/login"
               className="text-sm font-semibold text-[#0F172A] hover:text-[#0891B2] px-3 py-2 transition-colors"
