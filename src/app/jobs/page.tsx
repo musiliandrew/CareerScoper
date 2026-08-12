@@ -356,11 +356,19 @@ export default function JobsPage() {
     const titleLower = (job.title || "").trim().toLowerCase();
     const isJunkTitle =
       NON_JOB_TITLES.includes(titleLower) ||
+      titleLower.startsWith("view all") ||
+      titleLower.startsWith("learn more about") ||
+      titleLower.startsWith("search for") ||
       titleLower.startsWith("read our") ||
       titleLower.startsWith("about our") ||
       titleLower.startsWith("contact us") ||
       titleLower.startsWith("privacy policy") ||
-      titleLower.startsWith("terms of");
+      titleLower.startsWith("terms of") ||
+      titleLower.startsWith("welcome to") ||
+      titleLower.includes("newsletter") ||
+      titleLower.includes("work blog") ||
+      titleLower.includes("announcement") ||
+      titleLower.includes("sign-up");
 
     if (isJunkTitle) return false;
 
