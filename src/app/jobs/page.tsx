@@ -22,7 +22,12 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Share2,
+  Copy,
+  Check,
+  Send,
+  Mail
 } from "lucide-react";
 import { API_ENDPOINTS } from "@/lib/api";
 
@@ -126,11 +131,42 @@ export default function JobsPage() {
   const [applyModalJob, setApplyModalJob] = useState<Job | null>(null);
   const [recordApplication, setRecordApplication] = useState(true);
 
+  const [shareModalJob, setShareModalJob] = useState<Job | null>(null);
+  const [sharedJobId, setSharedJobId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const [companyFilter, setCompanyFilter] = useState("");
 
   const [page, setPage] = useState(1);
   const [totalJobsCount, setTotalJobsCount] = useState(0);
   const pageSize = 15;
+
+  const getShareUrl = (job: Job) => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}/jobs?id=${job.id}`;
+  };
+
+  const handleCopyLink = (url: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const comp = params.get("company") || "";
+      const jId = params.get("id") || params.get("jobId") || "";
+      if (comp) {
+        setCompanyFilter(comp);
+      }
+      if (jId) {
+        setSharedJobId(jId);
+      }
+    }
+  }, []);
 
   const handleConfirmApply = async (shouldRecord: boolean) => {
     if (!applyModalJob) return;
@@ -174,15 +210,7 @@ export default function JobsPage() {
     setApplyModalJob(null);
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const comp = params.get("company") || "";
-      if (comp) {
-        setCompanyFilter(comp);
-      }
-    }
-  }, []);
+
 
   const handleAgentApply = async (jobId: string | number) => {
     setAgentApplying((prev) => ({ ...prev, [jobId]: true }));
@@ -585,18 +613,28 @@ export default function JobsPage() {
                       })()}
                     </div>
 
-                    {/* Bookmark Toggle */}
-                    <button
-                      onClick={() => toggleBookmark(job.id)}
-                      className={`p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0 self-start ${
-                        isBookmarked
-                          ? "bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]"
-                          : "bg-white border-[#E2E8F0] text-[#94A3B8] hover:text-[#0F172A]"
-                      }`}
-                      title={isBookmarked ? "Remove bookmark" : "Save job"}
-                    >
-                      <Bookmark className="w-4 h-4" />
-                    </button>
+                    {/* Share & Bookmark Actions */}
+                    <div className="flex items-center gap-1.5 shrink-0 self-start">
+                      <button
+                        onClick={() => setShareModalJob(job)}
+                        className="p-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0891B2] hover:bg-[#F0FDFA] transition-colors cursor-pointer"
+                        title="Share Job Opportunity"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => toggleBookmark(job.id)}
+                        className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
+                          isBookmarked
+                            ? "bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]"
+                            : "bg-white border-[#E2E8F0] text-[#94A3B8] hover:text-[#0F172A]"
+                        }`}
+                        title={isBookmarked ? "Remove bookmark" : "Save job"}
+                      >
+                        <Bookmark className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* AI Deep Match Insights Box */}
@@ -687,13 +725,24 @@ export default function JobsPage() {
                       </button>
                     </div>
 
-                    <button
-                      onClick={() => setApplyModalJob(job)}
-                      className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => setShareModalJob(job)}
+                        className="h-9 px-3 bg-white border border-[#E2E8F0] hover:bg-[#F0FDFA] hover:border-[#0891B2]/50 text-[#475569] hover:text-[#0891B2] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                        title="Share Job Opportunity"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-[#0891B2]" />
+                        <span>Share</span>
+                      </button>
+
+                      <button
+                        onClick={() => setApplyModalJob(job)}
+                        className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -817,6 +866,118 @@ export default function JobsPage() {
                   <span>{recordApplication ? "Apply & Record" : "Just Open Link"}</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Share Job Modal Popup */}
+        {shareModalJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 relative">
+              <button
+                onClick={() => setShareModalJob(null)}
+                className="absolute top-4 right-4 text-[#94A3B8] hover:text-[#0F172A] p-1 rounded-lg hover:bg-[#F1F5F9] transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-[#0891B2]/10 border border-[#0891B2]/20 rounded-xl text-[#0891B2]">
+                  <Share2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono-code font-bold text-[#0891B2] uppercase tracking-wider">
+                    CareerScope Intelligence Hub
+                  </span>
+                  <h2 className="text-base font-bold text-[#0F172A]">Share Job Opportunity</h2>
+                </div>
+              </div>
+
+              {/* Job Preview Box */}
+              <div className="p-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono-code font-bold text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
+                    Shared via CareerScope
+                  </span>
+                  <span className="text-xs text-[#64748B] font-mono-code">{shareModalJob.work_type || "Remote"}</span>
+                </div>
+                <h3 className="text-sm font-bold text-[#0F172A]">{shareModalJob.title}</h3>
+                <p className="text-xs text-[#64748B] font-medium">
+                  {shareModalJob.company_name || shareModalJob.company} • {shareModalJob.location_text || "Remote"}
+                </p>
+              </div>
+
+              {/* Copy Link Input Section */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-[#334155] block">CareerScope Direct Link</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={getShareUrl(shareModalJob)}
+                    className="flex-1 px-3 py-2 text-xs font-mono-code bg-[#F1F5F9] border border-[#CBD5E1] rounded-xl text-[#334155] outline-none"
+                  />
+                  <button
+                    onClick={() => handleCopyLink(getShareUrl(shareModalJob))}
+                    className="px-3.5 py-2 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shrink-0"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? "Copied!" : "Copy"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Social Share Section */}
+              <div className="space-y-2 pt-1 border-t border-[#F1F5F9]">
+                <label className="text-xs font-bold text-[#334155] block">Share directly to</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                      `Check out this job opportunity: *${shareModalJob.title}* at *${shareModalJob.company_name || shareModalJob.company}* on CareerScope Intelligence Hub:\n${getShareUrl(shareModalJob)}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 p-2.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#128C7E] rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </a>
+
+                  <a
+                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(getShareUrl(shareModalJob))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 p-2.5 bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 border border-[#0A66C2]/30 text-[#0A66C2] rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>LinkedIn</span>
+                  </a>
+
+                  <a
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      `Check out this role: ${shareModalJob.title} at ${shareModalJob.company_name || shareModalJob.company} on CareerScope Intelligence Hub`
+                    )}&url=${encodeURIComponent(getShareUrl(shareModalJob))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 p-2.5 bg-[#0F172A]/10 hover:bg-[#0F172A]/20 border border-[#0F172A]/30 text-[#0F172A] rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>X (Twitter)</span>
+                  </a>
+
+                  <a
+                    href={`mailto:?subject=${encodeURIComponent(
+                      `Job Opportunity: ${shareModalJob.title} at ${shareModalJob.company_name || shareModalJob.company}`
+                    )}&body=${encodeURIComponent(
+                      `Hey,\n\nI found this job opportunity on CareerScope Intelligence Hub:\n\nRole: ${shareModalJob.title}\nCompany: ${shareModalJob.company_name || shareModalJob.company}\nLocation: ${shareModalJob.location_text || "Remote"}\n\nView details on CareerScope:\n${getShareUrl(shareModalJob)}`
+                    )}`}
+                    className="flex items-center justify-center gap-2 p-2.5 bg-[#EA4335]/10 hover:bg-[#EA4335]/20 border border-[#EA4335]/30 text-[#D93025] rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
