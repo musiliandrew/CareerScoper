@@ -282,9 +282,6 @@ export default function ApplicationsPage() {
                   <span className="text-xs font-mono-code font-bold text-[#0891B2]">
                     {app.match_score || 88}% Match
                   </span>
-                  <button className="px-3 py-1.5 border border-[#E2E8F0] hover:bg-white rounded-lg text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer">
-                    View Pipeline Details
-                  </button>
                 </div>
               </div>
             ))}
