@@ -335,61 +335,78 @@ export default function JobsPage() {
     if (!applyModalJob) return;
 
     const job = applyModalJob;
-    
+
     // Clean up pending apply state for this job
     setPendingApplyJobs((prev) => {
       const next = { ...prev };
       delete next[job.id];
       return next;
     });
-    const externalUrl = job.external_url || "#";
 
     if (shouldRecord) {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-        if (token) {
-          // If the job was tracked, remove the "saved" application record
-          const key = getJobKey(job);
-          const savedAppId = trackedAppIds[key];
-          if (savedAppId) {
-            try {
-              await fetch(`${API_ENDPOINTS.djangoApi}/applications/${savedAppId}/`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` }
-              });
-              setTrackedAppIds((prev) => {
-                const next = { ...prev };
-                delete next[key];
-                return next;
-              });
-            } catch (delErr) {
-              console.error("Failed to delete saved application before recording:", delErr);
-            }
-          }
-
-          await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              company_name: job.company_name || job.company || "Unknown Company",
-              job_title: job.title,
-              status: "applied",
-              applied_date: new Date().toISOString().split("T")[0],
-              application_url: externalUrl,
-              source: job.source_name || "Job Radar",
-              location: job.location_text || "",
-              work_type: job.work_type || "remote",
-              notes: `Recorded via Job Radar on ${new Date().toLocaleDateString()}`
-            })
-          });
+        if (!token) {
+          console.error("No access token — user must be logged in to record an application.");
+          setApplyModalJob(null);
+          return;
         }
+
+        // If the job was tracked/saved, delete that record first to avoid duplicates
+        const key = getJobKey(job);
+        const savedAppId = trackedAppIds[key];
+        if (savedAppId) {
+          try {
+            await fetch(`${API_ENDPOINTS.djangoApi}/applications/${savedAppId}/`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setTrackedAppIds((prev) => {
+              const next = { ...prev };
+              delete next[key];
+              return next;
+            });
+          } catch (delErr) {
+            console.error("Failed to delete saved application before recording:", delErr);
+          }
+        }
+
+        // POST the new "applied" record
+        const payload = {
+          company_name: job.company_name || job.company || "Unknown Company",
+          job_title: job.title,
+          status: "applied",
+          applied_date: new Date().toISOString().split("T")[0],
+          application_url: job.external_url || "",
+          source: job.source_name || "Job Radar",
+          location: job.location_text || "",
+          work_type: job.work_type || "remote",
+          notes: `Recorded via Job Radar on ${new Date().toLocaleDateString()}`
+        };
+
+        const res = await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          console.error(`Failed to record application (HTTP ${res.status}):`, errBody);
+          // Don't mark as applied in UI if backend rejected it
+          setApplyModalJob(null);
+          return;
+        }
+
+        // Backend confirmed — update UI state
         setAppliedStatus((prev) => ({ ...prev, [job.id]: true }));
         setAppliedJobKeys((prev) => ({ ...prev, [getJobKey(job)]: true }));
+
       } catch (err) {
-        console.error("Failed to record application:", err);
+        console.error("Network error recording application:", err);
       }
     }
 
