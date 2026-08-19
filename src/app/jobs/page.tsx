@@ -253,7 +253,7 @@ export default function JobsPage() {
     // Mark as pending confirmation
     setPendingApplyJobs((prev) => ({ ...prev, [job.id]: true }));
 
-    // Set 3 minute timer (180,000 ms) to trigger the apply confirmation modal
+    // Set 20 second timer (20,000 ms) to trigger the apply confirmation modal
     const timerId = setTimeout(() => {
       setApplyModalJob(job);
       setPendingApplyJobs((prev) => {
@@ -261,7 +261,7 @@ export default function JobsPage() {
         delete next[job.id];
         return next;
       });
-    }, 180000);
+    }, 20000);
 
     applyTimersRef.current.push(timerId);
   };
