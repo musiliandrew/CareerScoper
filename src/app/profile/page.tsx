@@ -252,6 +252,26 @@ function ProfileContent() {
     }
   };
 
+  const handleOAuth = async (provider: "google" | "github") => {
+    try {
+      const res = await fetch(`${API_ENDPOINTS.djangoApi}/auth/${provider}/login/`, {
+        credentials: "include"
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || `Could not initiate ${provider} authentication.`);
+      }
+      const data = await res.json();
+      if (data.auth_url) {
+        window.location.href = data.auth_url;
+      } else {
+        throw new Error(`Could not initiate ${provider} authentication.`);
+      }
+    } catch (err: any) {
+      alert(err.message || `Failed to initiate ${provider} login.`);
+    }
+  };
+
   const handleSaveRole = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!roleInput.trim()) return;
@@ -1490,12 +1510,12 @@ function ProfileContent() {
                   </div>
 
                   {!hasGithubAccount && !isEditingGithubUrl && (
-                    <a
-                      href={`${API_ENDPOINTS.djangoApi}/auth/github/login`}
+                    <button
+                      onClick={() => handleOAuth("github")}
                       className="w-full text-center py-2 px-3 bg-[#0891B2] hover:bg-[#06b6d4] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer block"
                     >
                       Connect GitHub Account (OAuth)
-                    </a>
+                    </button>
                   )}
                 </div>
               );
@@ -1529,12 +1549,12 @@ function ProfileContent() {
                   </div>
 
                   {!hasGoogle && (
-                    <a
-                      href={`${API_ENDPOINTS.djangoApi}/auth/google/login`}
+                    <button
+                      onClick={() => handleOAuth("google")}
                       className="w-full text-center py-2 px-3 border border-[#CBD5E1] hover:border-[#0891B2] bg-white hover:bg-[#0891B2]/5 text-[#0F172A] rounded-lg text-xs font-semibold transition-colors block"
                     >
                       Connect Google Account
-                    </a>
+                    </button>
                   )}
                 </div>
               );
