@@ -41,10 +41,10 @@ async function handleProxy(req: NextRequest, pathArray: string[]) {
     headers.set("content-type", reqHeaders["content-type"]);
   }
 
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  } else if (clientAuth) {
+  if (clientAuth) {
     headers.set("Authorization", clientAuth);
+  } else if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   let body = undefined;
