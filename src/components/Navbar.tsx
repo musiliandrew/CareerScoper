@@ -88,9 +88,9 @@ export default function Navbar() {
     <header className="w-full h-16 border-b border-[#E2E8F0] bg-white sticky top-0 z-40 shadow-xs">
       <div className="w-full mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
         
-        {/* Left Section: Mobile Brand Logo / Page Title */}
+        {/* Left Section: Brand Logo / Page Title */}
         <div className="flex items-center gap-3">
-          <Link href="/profile" className="lg:hidden flex items-center gap-2">
+          <Link href="/profile" className="flex items-center gap-2">
             <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
               <circle cx="16" cy="16" r="14" stroke="#0891B2" strokeWidth="2" fill="none" />
               <circle cx="16" cy="16" r="2.5" fill="#F59E0B" />
@@ -99,11 +99,6 @@ export default function Navbar() {
               Career<span className="cyan-text">Scope</span>
             </span>
           </Link>
-
-          <div className="hidden lg:flex items-center gap-2 text-xs font-mono-code text-[#64748B]">
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-            <span className="font-bold text-[#0F172A]">CAREER DASHBOARD</span>
-          </div>
         </div>
 
         {/* Right Section: Notification Bell & User Account Profile */}

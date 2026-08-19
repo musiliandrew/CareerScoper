@@ -1353,10 +1353,6 @@ export default function JobsPage() {
           <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
             <div className="max-w-[1280px] mx-auto space-y-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 font-mono-code text-[11px] font-bold text-[#0891B2]">
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>PUBLIC CAREERSCOPE DIRECTORY</span>
-                </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
                   Curated Tech Opportunities
                 </h1>
@@ -1402,10 +1398,6 @@ export default function JobsPage() {
         <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
           <div className="max-w-[1280px] mx-auto space-y-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0891B2]/10 border border-[#0891B2]/20 font-mono-code text-[11px] font-bold text-[#0891B2]">
-                <Globe className="w-3.5 h-3.5" />
-                <span>PUBLIC CAREERSCOPE DIRECTORY</span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
                 Curated Tech Opportunities
               </h1>
