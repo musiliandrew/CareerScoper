@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
-import AppLayout from "@/components/AppLayout";
+
 import {
   Briefcase,
   Search,
@@ -1343,69 +1343,25 @@ export default function JobsPage() {
     </main>
   );
 
-  if (authLoading) {
-    const hasToken = typeof window !== "undefined" && !!localStorage.getItem("access_token");
-    if (!hasToken) {
-      return (
-        <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
-          <Navbar />
-          {/* Public Header Hero Banner */}
-          <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
-            <div className="max-w-[1280px] mx-auto space-y-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-2 max-w-2xl">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
-                  Curated Tech Opportunities
-                </h1>
-                <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
-                  Explore live tech job listings aggregated across top engineering organizations. Sign up for a free account to unlock direct application URLs and 1-click AI Agent applications.
-                </p>
-              </div>
+  // /jobs is ALWAYS a public-layout page.
+  // Auth state only unlocks features (apply, track, match scores) — never changes the shell.
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
+      <Navbar />
 
-              <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0">
-                <Link
-                  href="/signup?redirect=/jobs"
-                  className="w-full sm:w-auto px-5 py-2.5 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-colors"
-                >
-                  <span>Create Free Profile</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-                <Link
-                  href="/login?redirect=/jobs"
-                  className="w-full sm:w-auto px-4 py-2.5 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#0F172A] rounded-xl text-xs font-bold text-center transition-colors"
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-          </section>
-          {mainContent}
-        </div>
-      );
-    }
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0891B2]"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
-        <Navbar />
-
-        {/* Public Header Hero Banner */}
+      {/* Header Banner — guest CTA or member stats depending on auth */}
+      {!authLoading && !isAuthenticated && (
         <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
-          <div className="max-w-[1280px] mx-auto space-y-4 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
                 Curated Tech Opportunities
               </h1>
               <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
-                Explore live tech job listings aggregated across top engineering organizations. Sign up for a free account to unlock direct application URLs and 1-click AI Agent applications.
+                Explore live tech job listings aggregated across top engineering organizations.
+                Sign up for a free account to unlock direct application URLs and 1-click AI Agent applications.
               </p>
             </div>
-
             <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0">
               <Link
                 href="/signup?redirect=/jobs"
@@ -1423,11 +1379,9 @@ export default function JobsPage() {
             </div>
           </div>
         </section>
+      )}
 
-        {mainContent}
-      </div>
-    );
-  }
-
-  return <AppLayout>{mainContent}</AppLayout>;
+      {mainContent}
+    </div>
+  );
 }
