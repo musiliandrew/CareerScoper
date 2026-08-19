@@ -130,6 +130,11 @@ export default function ApplicationsPage() {
   }
 
   const filteredApplications = applications.filter((app) => {
+    if (activeTab === "tracked") return app.status === "saved";
+    
+    // For other tabs (including "all"), filter out "saved" status
+    if (app.status === "saved") return false;
+    
     if (activeTab === "all") return true;
     if (activeTab === "interviewing") return app.status === "interview" || app.status === "screening";
     if (activeTab === "offers") return app.status === "offer" || app.status === "accepted";
@@ -147,7 +152,7 @@ export default function ApplicationsPage() {
       case "applied":
         return <span className="px-2.5 py-1 bg-[#E0F2FE] border border-[#BAE6FD] text-[#0369A1] rounded-full text-xs font-mono-code font-bold">Applied</span>;
       case "saved":
-        return <span className="px-2.5 py-1 bg-[#F1F5F9] border border-[#E2E8F0] text-[#475569] rounded-full text-xs font-mono-code font-bold">Saved</span>;
+        return <span className="px-2.5 py-1 bg-amber-50 border border-amber-200 text-amber-600 rounded-full text-xs font-mono-code font-bold flex items-center gap-1"><span>Tracked</span><span>★</span></span>;
       case "rejected":
         return <span className="px-2.5 py-1 bg-[#FEF2F2] border border-[#FCA5A5] text-[#991B1B] rounded-full text-xs font-mono-code font-bold">Not Selected</span>;
       default:
@@ -185,7 +190,9 @@ export default function ApplicationsPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white border border-[#E2E8F0] p-4 rounded-xl shadow-xs text-center space-y-1">
-            <div className="text-2xl font-black text-[#0F172A]">{applications.length}</div>
+            <div className="text-2xl font-black text-[#0F172A]">
+              {applications.filter(a => a.status !== "saved").length}
+            </div>
             <div className="text-[11px] font-mono-code font-semibold text-[#64748B] uppercase">Total Active</div>
           </div>
           <div className="bg-white border border-[#E2E8F0] p-4 rounded-xl shadow-xs text-center space-y-1">
@@ -202,7 +209,7 @@ export default function ApplicationsPage() {
           </div>
           <div className="bg-white border border-[#E2E8F0] p-4 rounded-xl shadow-xs text-center space-y-1">
             <div className="text-2xl font-black text-[#8B5CF6]">
-              {applications.filter(a => a.is_auto_applied).length}
+              {applications.filter(a => a.is_auto_applied && a.status !== "saved").length}
             </div>
             <div className="text-[11px] font-mono-code font-semibold text-[#64748B] uppercase">AI Auto-Applied</div>
           </div>
@@ -210,17 +217,18 @@ export default function ApplicationsPage() {
 
         {/* Pipeline Tabs */}
         <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] pb-2">
-          {["all", "applied", "interviewing", "offers", "saved", "rejected"].map((tab) => (
+          {["all", "applied", "interviewing", "offers", "tracked", "rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1 ${
                 activeTab === tab
                   ? "bg-[#0891B2] text-white shadow-xs"
                   : "bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-[#F8FAFC]"
               }`}
             >
-              {tab}
+              <span>{tab}</span>
+              {tab === "tracked" && <span>★</span>}
             </button>
           ))}
         </div>

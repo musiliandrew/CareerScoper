@@ -9,7 +9,7 @@ import {
   MapPin,
   DollarSign,
   ExternalLink,
-  Bookmark,
+  Star,
   Sparkles,
   SlidersHorizontal,
   Loader2,
@@ -126,7 +126,7 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
   const [workTypeFilter, setWorkTypeFilter] = useState("all");
   const [highMatchOnly, setHighMatchOnly] = useState(false);
-  const [bookmarkedIds, setBookmarkedIds] = useState<Record<string | number, boolean>>({});
+  const [trackedAppIds, setTrackedAppIds] = useState<Record<string | number, string | number>>({});
   const [agentApplying, setAgentApplying] = useState<Record<string | number, boolean>>({});
   const [appliedStatus, setAppliedStatus] = useState<Record<string | number, boolean>>({});
   const [syncingJob, setSyncingJob] = useState<Record<string | number, boolean>>({});
@@ -141,6 +141,101 @@ export default function JobsPage() {
       applyTimersRef.current.forEach((t) => clearTimeout(t));
     };
   }, []);
+
+  const getJobKey = (job: Job) => {
+    const title = job.title || "";
+    const company = job.company_name || job.company || "";
+    return `${title.toLowerCase()}:::${company.toLowerCase()}`;
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    async function fetchTrackedJobs() {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (!token) return;
+        const res = await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const rows = Array.isArray(data) ? data : data.results || [];
+          
+          const appIds: Record<string | number, string | number> = {};
+          rows.forEach((app: any) => {
+            if (app.status === "saved") {
+              const key = `${app.job_title.toLowerCase()}:::${app.company_name.toLowerCase()}`;
+              appIds[key] = app.id;
+            }
+          });
+          setTrackedAppIds(appIds);
+        }
+      } catch (err) {
+        console.error("Error fetching tracked jobs", err);
+      }
+    }
+    fetchTrackedJobs();
+  }, [isAuthenticated, jobs]);
+
+  const toggleTrackJob = async (job: Job) => {
+    if (!isAuthenticated) {
+      setUnauthModalOpen(true);
+      return;
+    }
+    const key = getJobKey(job);
+    const appId = trackedAppIds[key];
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) return;
+
+    if (appId) {
+      try {
+        const res = await fetch(`${API_ENDPOINTS.djangoApi}/applications/${appId}/`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          setTrackedAppIds((prev) => {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+          });
+        }
+      } catch (err) {
+        console.error("Failed to delete application:", err);
+      }
+    } else {
+      try {
+        const externalUrl = job.external_url || "#";
+        const res = await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            company_name: job.company_name || job.company || "Unknown Company",
+            job_title: job.title,
+            status: "saved",
+            applied_date: null,
+            application_url: externalUrl,
+            source: job.source_name || "Job Radar",
+            location: job.location_text || "",
+            work_type: job.work_type || "remote",
+            notes: `Tracked via Job Radar on ${new Date().toLocaleDateString()}`
+          })
+        });
+        if (res.ok) {
+          const newApp = await res.json();
+          setTrackedAppIds((prev) => ({
+            ...prev,
+            [key]: newApp.id
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to track job:", err);
+      }
+    }
+  };
 
   const handleApplyNowClick = (job: Job) => {
     const externalUrl = job.external_url || "#";
@@ -329,10 +424,6 @@ export default function JobsPage() {
 
     fetchJobs();
   }, [page, pageSize, companyFilter]);
-
-  const toggleBookmark = (id: string | number) => {
-    setBookmarkedIds((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const resetFilters = () => {
     setSearch("");
@@ -630,7 +721,7 @@ export default function JobsPage() {
           <div className="space-y-4">
             {filteredJobs.map((job) => {
               const match = job.jobMatch || job.job_match || 80;
-              const isBookmarked = !!bookmarkedIds[job.id];
+              const isTracked = !!trackedAppIds[`${job.title?.toLowerCase()}:::${(job.company_name || job.company || "").toLowerCase()}`];
               const company = job.company_name || job.company || "Leading Tech Corp";
               const locationText = job.location_text || "Remote";
               const isSharedTarget = sharedJobId && String(job.id) === String(sharedJobId);
@@ -748,15 +839,15 @@ export default function JobsPage() {
                       </button>
 
                       <button
-                        onClick={() => toggleBookmark(job.id)}
+                        onClick={() => toggleTrackJob(job)}
                         className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
-                          isBookmarked
-                            ? "bg-[#0891B2]/10 border-[#0891B2] text-[#0891B2]"
+                          isTracked
+                            ? "bg-amber-500/10 border-amber-400 text-amber-500"
                             : "bg-white border-[#E2E8F0] text-[#94A3B8] hover:text-[#0F172A]"
                         }`}
-                        title={isBookmarked ? "Remove bookmark" : "Save job"}
+                        title={isTracked ? "Remove from tracking" : "Track this job opportunity"}
                       >
-                        <Bookmark className="w-4 h-4" />
+                        <Star className={`w-4 h-4 ${isTracked ? "fill-amber-500" : ""}`} />
                       </button>
                     </div>
                   </div>
