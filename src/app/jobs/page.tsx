@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import AppLayout from "@/components/AppLayout";
 import {
@@ -134,6 +134,28 @@ export default function JobsPage() {
   const [applyModalJob, setApplyModalJob] = useState<Job | null>(null);
   const [recordApplication, setRecordApplication] = useState(true);
 
+  const applyTimersRef = useRef<any[]>([]);
+
+  useEffect(() => {
+    return () => {
+      applyTimersRef.current.forEach((t) => clearTimeout(t));
+    };
+  }, []);
+
+  const handleApplyNowClick = (job: Job) => {
+    const externalUrl = job.external_url || "#";
+    if (externalUrl && externalUrl !== "#") {
+      window.open(externalUrl, "_blank", "noopener,noreferrer");
+    }
+
+    // Set 3 minute timer (180,000 ms) to trigger the apply confirmation modal
+    const timerId = setTimeout(() => {
+      setApplyModalJob(job);
+    }, 180000);
+
+    applyTimersRef.current.push(timerId);
+  };
+
   const [shareModalJob, setShareModalJob] = useState<Job | null>(null);
   const [sharedJobId, setSharedJobId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -178,10 +200,6 @@ export default function JobsPage() {
 
     const job = applyModalJob;
     const externalUrl = job.external_url || "#";
-
-    if (externalUrl && externalUrl !== "#") {
-      window.open(externalUrl, "_blank", "noopener,noreferrer");
-    }
 
     if (shouldRecord) {
       try {
@@ -870,7 +888,7 @@ export default function JobsPage() {
                         </div>
                       ) : (
                         <button
-                          onClick={() => setApplyModalJob(job)}
+                          onClick={() => handleApplyNowClick(job)}
                           className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                         >
                           <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
@@ -952,9 +970,9 @@ export default function JobsPage() {
                 </div>
                 <div>
                   <span className="text-[11px] font-mono-code font-bold text-[#0891B2] uppercase tracking-wider">
-                    Application Telemetry
+                    Application Tracking
                   </span>
-                  <h2 className="text-base font-bold text-[#0F172A]">Confirm Job Application</h2>
+                  <h2 className="text-base font-bold text-[#0F172A]">Record Your Application?</h2>
                 </div>
               </div>
 
@@ -966,40 +984,23 @@ export default function JobsPage() {
               </div>
 
               <p className="text-xs text-[#475569] leading-relaxed">
-                Do you want to record this application in your <strong>Applications Dashboard</strong> to track status, interviews, and AI insights?
+                You opened this job application link 3 minutes ago. Did you apply to this role? Record it in your <strong>Applications Dashboard</strong> to keep track of interviews and status.
               </p>
-
-              <label className="flex items-start gap-3 p-3.5 bg-[#ECFDF5] border border-[#A7F3D0] rounded-xl cursor-pointer hover:bg-[#D1FAE5] transition-colors">
-                <input
-                  type="checkbox"
-                  checked={recordApplication}
-                  onChange={(e) => setRecordApplication(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 text-[#059669] border-[#A7F3D0] rounded focus:ring-[#059669]"
-                />
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-[#065F46] block">
-                    Record in Applications Tracker
-                  </span>
-                  <span className="text-[11px] text-[#047857] block">
-                    Logs this role in your active Applications tracker so you can monitor progress.
-                  </span>
-                </div>
-              </label>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#F1F5F9]">
                 <button
-                  onClick={() => setApplyModalJob(null)}
+                  onClick={() => handleConfirmApply(false)}
                   className="px-4 py-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] rounded-xl text-xs font-semibold cursor-pointer transition-colors"
                 >
-                  Cancel
+                  No, I didn't apply
                 </button>
 
                 <button
-                  onClick={() => handleConfirmApply(recordApplication)}
+                  onClick={() => handleConfirmApply(true)}
                   className="px-4 py-2 bg-[#0891B2] hover:bg-[#0891B2]/90 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                 >
-                  <span>{recordApplication ? "Apply & Record" : "Just Open Link"}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Yes, record application</span>
                 </button>
               </div>
             </div>
