@@ -908,65 +908,52 @@ export default function JobsPage() {
                       })()}
                     </div>
 
-                    {/* Share & Bookmark Actions */}
-                    <div className="flex items-center gap-1.5 shrink-0 self-start">
-                      <button
-                        onClick={() => setShareModalJob(job)}
-                        className="p-2.5 rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] hover:text-[#0891B2] hover:bg-[#F0FDFA] transition-colors cursor-pointer"
-                        title="Share Job Opportunity"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        onClick={() => toggleTrackJob(job)}
-                        className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
-                          isTracked
-                            ? "bg-amber-500/10 border-amber-400 text-amber-500"
-                            : "bg-white border-[#E2E8F0] text-[#94A3B8] hover:text-[#0F172A]"
-                        }`}
-                        title={isTracked ? "Remove from tracking" : "Track this job opportunity"}
-                      >
-                        <Star className={`w-4 h-4 ${isTracked ? "fill-amber-500" : ""}`} />
-                      </button>
-                    </div>
+                    {/* Track button — members only; share is in the bottom row */}
+                    {isAuthenticated && (
+                      <div className="flex items-center gap-1.5 shrink-0 self-start">
+                        <button
+                          onClick={() => toggleTrackJob(job)}
+                          className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
+                            isTracked
+                              ? "bg-amber-500/10 border-amber-400 text-amber-500"
+                              : "bg-white border-[#E2E8F0] text-[#94A3B8] hover:text-[#0F172A]"
+                          }`}
+                          title={isTracked ? "Remove from tracking" : "Track this job opportunity"}
+                        >
+                          <Star className={`w-4 h-4 ${isTracked ? "fill-amber-500" : ""}`} />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* AI Deep Match Insights Box */}
+                  {/* AI Match Insights — members only */}
+                  {isAuthenticated && (
                   <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#0891B2]/20 space-y-1.5">
                     <div className="flex items-center gap-1.5 text-[10px] font-mono-code uppercase font-bold text-[#0891B2] tracking-wider">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>{isAuthenticated ? "CareerScope AI Match Telemetry" : "Market Role Telemetry"}</span>
+                      <span>CareerScope AI Match Telemetry</span>
                     </div>
                     {(() => {
-                      if (isAuthenticated) {
-                        const rawReason = job.match_reasons || `High vector alignment with your verified skill graph (${match}% match score).`;
-                        const cleanReason = rawReason
-                          .replace(/dynamically computed from skill telemetries\.?/gi, "evaluated against your verified skill graph.")
-                          .replace(/dynamically computed from user skill graph\.?/gi, "evaluated against your verified skill graph.")
-                          .replace(/dynamically computed\.?/gi, "evaluated against your verified skill graph.");
-                        return (
-                          <p className="text-xs text-[#1E293B] leading-relaxed flex items-start gap-2">
-                            <span className="text-[#10B981] font-bold mt-0.5">●</span>
-                            <span>{cleanReason}</span>
-                          </p>
-                        );
-                      } else {
-                        return (
-                          <p className="text-xs text-[#1E293B] leading-relaxed flex items-start gap-2">
-                            <span className="text-[#0891B2] font-bold mt-0.5">●</span>
-                            <span>Live tech role monitored by CareerScope. Sign in or create a free profile to calculate your personalized AI match score and unlock direct application links.</span>
-                          </p>
-                        );
-                      }
+                      const rawReason = job.match_reasons || `High vector alignment with your verified skill graph (${match}% match score).`;
+                      const cleanReason = rawReason
+                        .replace(/dynamically computed from skill telemetries\.?/gi, "evaluated against your verified skill graph.")
+                        .replace(/dynamically computed from user skill graph\.?/gi, "evaluated against your verified skill graph.")
+                        .replace(/dynamically computed\.?/gi, "evaluated against your verified skill graph.");
+                      return (
+                        <p className="text-xs text-[#1E293B] leading-relaxed flex items-start gap-2">
+                          <span className="text-[#10B981] font-bold mt-0.5">●</span>
+                          <span>{cleanReason}</span>
+                        </p>
+                      );
                     })()}
-                    {isAuthenticated && job.match_concerns && (
+                    {job.match_concerns && (
                       <p className="text-xs text-[#92400E] leading-relaxed flex items-start gap-2 pt-0.5">
                         <span className="text-[#F59E0B] font-bold mt-0.5">●</span>
                         <span>{job.match_concerns}</span>
                       </p>
                     )}
                   </div>
+                  )}
 
                   {/* Bottom Actions Row */}
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-[#F1F5F9]">
