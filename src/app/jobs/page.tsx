@@ -283,9 +283,26 @@ export default function JobsPage() {
   const [totalJobsCount, setTotalJobsCount] = useState(0);
   const pageSize = 15;
 
+  const slugify = (str: string) =>
+    str
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 80);
+
+  const getJobSlug = (job: Job) => {
+    const title = job.title || "job";
+    const company = job.company_name || job.company || "company";
+    const location = (job.work_type || job.location_text || "remote").split(",")[0].trim();
+    return slugify(`${title}-${company}-${location}`);
+  };
+
   const getShareUrl = (job: Job) => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/jobs?id=${job.id}`;
+    const slug = getJobSlug(job);
+    return `${window.location.origin}/jobs?job=${encodeURIComponent(slug)}&id=${job.id}`;
   };
 
   const handleCopyLink = (url: string) => {
@@ -301,10 +318,14 @@ export default function JobsPage() {
       const params = new URLSearchParams(window.location.search);
       const comp = params.get("company") || "";
       const jId = params.get("id") || params.get("jobId") || "";
+      const jSlug = params.get("job") || "";
       if (comp) {
         setCompanyFilter(comp);
       }
-      if (jId) {
+      // Store slug first; fall back to raw UUID
+      if (jSlug) {
+        setSharedJobId(jSlug);
+      } else if (jId) {
         setSharedJobId(jId);
       }
     }
@@ -556,8 +577,10 @@ export default function JobsPage() {
     return matchesSearch && matchesWorkType && matchesHighMatch;
   }).sort((a, b) => {
     if (sharedJobId) {
-      if (String(a.id) === String(sharedJobId)) return -1;
-      if (String(b.id) === String(sharedJobId)) return 1;
+      const matchesA = String(a.id) === String(sharedJobId) || getJobSlug(a) === sharedJobId;
+      const matchesB = String(b.id) === String(sharedJobId) || getJobSlug(b) === sharedJobId;
+      if (matchesA) return -1;
+      if (matchesB) return 1;
     }
     const dateA = new Date(a.posted_at || a.created_at || 0).getTime();
     const dateB = new Date(b.posted_at || b.created_at || 0).getTime();
@@ -725,7 +748,7 @@ export default function JobsPage() {
           <div className="flex items-center justify-between bg-[#0891B2]/10 border border-[#0891B2]/40 p-4 rounded-2xl shadow-xs">
             <div className="flex items-center gap-3 text-xs font-mono-code text-[#0891B2]">
               <Sparkles className="w-4 h-4 text-[#0891B2] shrink-0" />
-              <span>Viewing shared job opportunity link: <strong className="text-[#0F172A] font-bold font-sans">ID #{sharedJobId}</strong></span>
+              <span>Shared job opportunity: <strong className="text-[#0F172A] font-bold font-sans">{(() => { const j = jobs.find(x => String(x.id) === (new URLSearchParams(typeof window !== "undefined" ? window.location.search : "")).get("id") || getJobSlug(x) === sharedJobId); return j ? `${j.title} @ ${j.company_name || j.company}` : sharedJobId; })()}</strong></span>
             </div>
             <button
               onClick={() => {
@@ -777,7 +800,8 @@ export default function JobsPage() {
               const isTracked = !!trackedAppIds[`${job.title?.toLowerCase()}:::${(job.company_name || job.company || "").toLowerCase()}`];
               const company = job.company_name || job.company || "Leading Tech Corp";
               const locationText = job.location_text || "Remote";
-              const isSharedTarget = sharedJobId && String(job.id) === String(sharedJobId);
+              const isSharedTarget = sharedJobId &&
+                (String(job.id) === String(sharedJobId) || getJobSlug(job) === sharedJobId);
 
               return (
                 <div
