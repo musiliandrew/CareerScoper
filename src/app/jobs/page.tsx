@@ -127,6 +127,7 @@ export default function JobsPage() {
   const [workTypeFilter, setWorkTypeFilter] = useState("all");
   const [highMatchOnly, setHighMatchOnly] = useState(false);
   const [trackedAppIds, setTrackedAppIds] = useState<Record<string | number, string | number>>({});
+  const [appliedJobKeys, setAppliedJobKeys] = useState<Record<string, boolean>>({});
   const [agentApplying, setAgentApplying] = useState<Record<string | number, boolean>>({});
   const [appliedStatus, setAppliedStatus] = useState<Record<string | number, boolean>>({});
   const [syncingJob, setSyncingJob] = useState<Record<string | number, boolean>>({});
@@ -162,13 +163,18 @@ export default function JobsPage() {
           const rows = Array.isArray(data) ? data : data.results || [];
           
           const appIds: Record<string | number, string | number> = {};
+          const appliedKeys: Record<string, boolean> = {};
+          
           rows.forEach((app: any) => {
+            const key = `${app.job_title.toLowerCase()}:::${app.company_name.toLowerCase()}`;
             if (app.status === "saved") {
-              const key = `${app.job_title.toLowerCase()}:::${app.company_name.toLowerCase()}`;
               appIds[key] = app.id;
+            } else {
+              appliedKeys[key] = true;
             }
           });
           setTrackedAppIds(appIds);
+          setAppliedJobKeys(appliedKeys);
         }
       } catch (err) {
         console.error("Error fetching tracked jobs", err);
@@ -300,6 +306,25 @@ export default function JobsPage() {
       try {
         const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
         if (token) {
+          // If the job was tracked, remove the "saved" application record
+          const key = getJobKey(job);
+          const savedAppId = trackedAppIds[key];
+          if (savedAppId) {
+            try {
+              await fetch(`${API_ENDPOINTS.djangoApi}/applications/${savedAppId}/`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              setTrackedAppIds((prev) => {
+                const next = { ...prev };
+                delete next[key];
+                return next;
+              });
+            } catch (delErr) {
+              console.error("Failed to delete saved application before recording:", delErr);
+            }
+          }
+
           await fetch(`${API_ENDPOINTS.djangoApi}/applications/`, {
             method: "POST",
             headers: {
@@ -320,6 +345,7 @@ export default function JobsPage() {
           });
         }
         setAppliedStatus((prev) => ({ ...prev, [job.id]: true }));
+        setAppliedJobKeys((prev) => ({ ...prev, [getJobKey(job)]: true }));
       } catch (err) {
         console.error("Failed to record application:", err);
       }
@@ -462,6 +488,12 @@ export default function JobsPage() {
   ];
 
   const filteredJobs = jobs.filter((job) => {
+    // Filter out jobs that the user has already applied to
+    const jobKey = `${job.title?.toLowerCase()}:::${(job.company_name || job.company || "").toLowerCase()}`;
+    if (appliedJobKeys[jobKey]) {
+      return false;
+    }
+
     const titleLower = (job.title || "").trim().toLowerCase();
     const isJunkTitle =
       NON_JOB_TITLES.includes(titleLower) ||
