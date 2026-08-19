@@ -597,7 +597,7 @@ export default function JobsPage() {
   });
 
   const mainContent = (
-    <main className="flex-1 max-w-[1280px] w-full mx-auto p-4 sm:p-8 space-y-6">
+    <main className="flex-1 max-w-[1280px] w-full mx-auto px-4 py-4 sm:px-8 sm:py-8 space-y-4 sm:space-y-6">
       
       {/* Member Header (Only rendered inside internal member dashboard) */}
       {isAuthenticated && (
@@ -621,21 +621,23 @@ export default function JobsPage() {
         </div>
       )}
 
-        {/* Search & Filter Bar */}
-        <div className="bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-xs space-y-4">
+
+        {/* Search & Filter Bar — members only */}
+        {isAuthenticated && (
+        <div className="bg-white border border-[#E2E8F0] p-4 sm:p-5 rounded-2xl shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row gap-3 items-center">
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by job title, company, or skill (e.g. Next.js, Python, Remote)..."
+                placeholder="Search by job title, company, or skill..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#0891B2] focus:bg-white rounded-xl text-xs outline-none transition-all text-[#0F172A]"
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
               <select
                 value={workTypeFilter}
                 onChange={(e) => setWorkTypeFilter(e.target.value)}
@@ -656,7 +658,7 @@ export default function JobsPage() {
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>High Match (75%+)</span>
+                <span>High Match</span>
               </button>
 
               {(search || workTypeFilter !== "all" || highMatchOnly) && (
@@ -717,10 +719,11 @@ export default function JobsPage() {
               }`}
             >
               <Sparkles className="w-3 h-3" />
-              <span>High Match (75%+)</span>
+              <span>High Match</span>
             </button>
           </div>
         </div>
+        )}
 
         {/* Company Filter Pill Banner */}
         {companyFilter && (
