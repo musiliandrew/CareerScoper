@@ -127,6 +127,7 @@ export default function JobsPage() {
   const [workTypeFilter, setWorkTypeFilter] = useState("all");
   const [highMatchOnly, setHighMatchOnly] = useState(false);
   const [trackedAppIds, setTrackedAppIds] = useState<Record<string | number, string | number>>({});
+  const [pendingApplyJobs, setPendingApplyJobs] = useState<Record<string | number, boolean>>({});
   const [appliedJobKeys, setAppliedJobKeys] = useState<Record<string, boolean>>({});
   const [agentApplying, setAgentApplying] = useState<Record<string | number, boolean>>({});
   const [appliedStatus, setAppliedStatus] = useState<Record<string | number, boolean>>({});
@@ -249,12 +250,24 @@ export default function JobsPage() {
       window.open(externalUrl, "_blank", "noopener,noreferrer");
     }
 
+    // Mark as pending confirmation
+    setPendingApplyJobs((prev) => ({ ...prev, [job.id]: true }));
+
     // Set 3 minute timer (180,000 ms) to trigger the apply confirmation modal
     const timerId = setTimeout(() => {
       setApplyModalJob(job);
+      setPendingApplyJobs((prev) => {
+        const next = { ...prev };
+        delete next[job.id];
+        return next;
+      });
     }, 180000);
 
     applyTimersRef.current.push(timerId);
+  };
+
+  const triggerManualConfirm = (job: Job) => {
+    setApplyModalJob(job);
   };
 
   const [shareModalJob, setShareModalJob] = useState<Job | null>(null);
@@ -300,6 +313,13 @@ export default function JobsPage() {
     if (!applyModalJob) return;
 
     const job = applyModalJob;
+    
+    // Clean up pending apply state for this job
+    setPendingApplyJobs((prev) => {
+      const next = { ...prev };
+      delete next[job.id];
+      return next;
+    });
     const externalUrl = job.external_url || "#";
 
     if (shouldRecord) {
@@ -1011,10 +1031,27 @@ export default function JobsPage() {
                         </div>
                       ) : (
                         <button
-                          onClick={() => handleApplyNowClick(job)}
-                          className="w-full sm:w-auto btn-primary-dark h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                          onClick={() => {
+                            if (pendingApplyJobs[job.id]) {
+                              triggerManualConfirm(job);
+                            } else {
+                              handleApplyNowClick(job);
+                            }
+                          }}
+                          className={`w-full sm:w-auto h-9 px-5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-all ${
+                            pendingApplyJobs[job.id]
+                              ? "bg-amber-500 hover:bg-amber-600 text-white border border-amber-600 animate-pulse"
+                              : "btn-primary-dark"
+                          }`}
+                          disabled={!!agentApplying[job.id] || !!appliedStatus[job.id]}
                         >
-                          <span>{appliedStatus[job.id] ? "Applied" : "Apply Now"}</span>
+                          <span>
+                            {appliedStatus[job.id]
+                              ? "Applied"
+                              : pendingApplyJobs[job.id]
+                              ? "Confirm Applied?"
+                              : "Apply Now"}
+                          </span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </button>
                       )}
