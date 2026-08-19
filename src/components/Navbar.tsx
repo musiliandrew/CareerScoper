@@ -157,13 +157,6 @@ export default function Navbar() {
           ) : (
             <div className="flex items-center gap-2">
               <Link
-                href="/jobs"
-                className="flex items-center gap-1.5 text-xs font-bold text-[#0891B2] hover:text-[#0891B2]/80 px-3 py-1.5 bg-[#0891B2]/10 border border-[#0891B2]/20 rounded-xl transition-colors"
-              >
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>Job Radar</span>
-              </Link>
-              <Link
                 href="/login"
                 className="px-3.5 py-1.5 text-xs font-semibold text-[#0F172A] hover:text-[#0891B2] transition-colors"
               >
