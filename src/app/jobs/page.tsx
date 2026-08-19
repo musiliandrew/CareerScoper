@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/AppLayout";
 
 import {
   Briefcase,
@@ -1343,14 +1344,23 @@ export default function JobsPage() {
     </main>
   );
 
-  // /jobs is ALWAYS a public-layout page.
-  // Auth state only unlocks features (apply, track, match scores) — never changes the shell.
+  // Pre-flight layout decision from localStorage — no flashing in either direction:
+  // • Token present  → AppLayout (sidebar) from first paint, auth verifies in background
+  // • No token       → Public layout (no sidebar) from first paint, never tries to load dashboard
+  const hasToken = typeof window !== "undefined" && !!localStorage.getItem("access_token");
+  const useAppLayout = isAuthenticated || (authLoading && hasToken);
+
+  if (useAppLayout) {
+    return <AppLayout>{mainContent}</AppLayout>;
+  }
+
+  // Guest / unauthenticated — clean public-facing page, no sidebar
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col text-[#0F172A]">
       <Navbar />
 
-      {/* Header Banner — guest CTA or member stats depending on auth */}
-      {!authLoading && !isAuthenticated && (
+      {/* Guest CTA banner — only shown once auth check is settled */}
+      {!authLoading && (
         <section className="bg-white border-b border-[#E2E8F0] py-8 px-4 sm:px-8">
           <div className="max-w-[1280px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2 max-w-2xl">
